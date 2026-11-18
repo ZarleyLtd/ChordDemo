@@ -59,7 +59,23 @@
     if (raw < p.t - 2 || raw > p.t + 20) { p.tries++; p.last = performance.now(); player.seekTo(p.t, true); }
   }
 
+  /** Play button over the chord strip: shown when a song is loaded but not playing (not during ads). */
+  function updateStripPlay() {
+    if (!playerReady) return;
+    const s = player.getPlayerState();
+    const P = YT.PlayerState;
+    $('stripPlay').hidden = !(s === P.PAUSED || s === P.CUED || s === P.ENDED);
+  }
+
+  function togglePlay() {
+    if (!playerReady) return;
+    const s = player.getPlayerState();
+    if (s === YT.PlayerState.PLAYING || s === YT.PlayerState.BUFFERING) player.pauseVideo();
+    else player.playVideo();
+  }
+
   function onPlayerState() {
+    updateStripPlay();
     // Unanalysed song: once the video's title is known, try LRCLIB for lyrics.
     if (!st.song && !st.lines.length && !st.lyricsTried && player.getVideoData) {
       const title = player.getVideoData().title;
@@ -263,6 +279,10 @@
     $('capoUp').addEventListener('click', () => { st.capo = Math.min(11, st.capo + 1); refreshChords(); });
     $('bestBtn').addEventListener('click', () => {
       st.capo = window.Music.bestCapo(st.song ? st.song.chords : [], st.simple).capo; refreshChords();
+    });
+    $('chordStrip').addEventListener('click', togglePlay);
+    $('chordStrip').addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePlay(); }
     });
     $('simpleBtn').addEventListener('click', () => { st.simple = !st.simple; refreshChords(); });
     $('offDown').addEventListener('click', () => { st.lyricOffset -= 0.25; st.lineIdx = -2; refreshChords(); });

@@ -24,7 +24,11 @@
       <div class="video"><div id="player"></div></div>
       <div id="adNote" class="ad-note" hidden>Ad playing: chords and lyrics start when the song does</div>
 
-      <div id="chordStrip" class="strip" aria-label="Previous, current and next chord"></div>
+      <div id="chordStrip" class="strip" role="button" tabindex="0" aria-label="Chords: tap to pause or play">
+        <div id="stripPlay" class="strip-play" hidden aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="28" height="28"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+        </div>
+      </div>
 
       <div class="lyrics" aria-live="off">
         <div id="lyPrev" class="ly prev"></div>
@@ -41,7 +45,7 @@
           <button id="bestBtn" class="pill">Best</button>
         </div>
         <div class="ctl">
-          <button id="simpleBtn" class="pill toggle" aria-pressed="true">Simple chords</button>
+          <button id="simpleBtn" class="pill toggle" aria-pressed="true">Simplify</button>
           <span class="label">Lyrics</span>
           <button id="offDown" aria-label="Lyrics earlier">−</button>
           <span id="offsetVal" class="val">0.00s</span>
