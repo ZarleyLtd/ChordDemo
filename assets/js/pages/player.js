@@ -76,15 +76,22 @@
 
   function onPlayerState() {
     updateStripPlay();
-    // Unanalysed song: once the video's title is known, try LRCLIB for lyrics.
+    // Unanalysed song: once the video is loaded, try LRCLIB for lyrics. The channel name
+    // (often the only place the artist appears) comes from oEmbed; the player leaves it empty.
     if (!st.song && !st.lines.length && !st.lyricsTried && player.getVideoData) {
       const data = player.getVideoData();
-      const title = data.title;
-      if (title) {
+      if (data.title) {
         st.lyricsTried = true;
-        window.Lyrics.searchByTitle(title, player.getDuration() || 0, data.author)
-          .then((lrc) => { if (lrc) { st.lines = window.Lyrics.parseLrc(lrc); st.lineIdx = -2; } else setLyricText('', 'No synced lyrics found', ''); })
-          .catch(() => setLyricText('', 'Lyrics lookup failed', ''));
+        const id = st.id, duration = player.getDuration() || 0;
+        window.Lyrics.videoInfo(id)
+          .then((info) => window.Lyrics.searchByTitle(
+            (info && info.title) || data.title, duration, (info && info.author) || data.author))
+          .then((lrc) => {
+            if (st.id !== id) return;
+            if (lrc) { st.lines = window.Lyrics.parseLrc(lrc); st.lineIdx = -2; }
+            else setLyricText('', 'No synced lyrics found', '');
+          })
+          .catch(() => { if (st.id === id) setLyricText('', 'Lyrics lookup failed', ''); });
       }
     }
   }
@@ -330,6 +337,6 @@
   // Console/debug helper: ChordDemoDebug()
   window.ChordDemoDebug = () => playerReady && ({
     state: player.getPlayerState(), time: player.getCurrentTime(), duration: player.getDuration(),
-    video: (player.getVideoData() || {}).video_id, songDuration: st.song && st.song.duration, pendingSeek: st.pendingSeek,
+    video: player.getVideoData() || {}, songDuration: st.song && st.song.duration, pendingSeek: st.pendingSeek,
   });
 })();

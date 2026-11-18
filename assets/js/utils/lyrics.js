@@ -42,17 +42,31 @@
       .replace(/\s*(official|music|tv)$/i, '').trim();
   }
 
+  /** Title and channel name of a YouTube video via oEmbed (CORS-enabled). The IFrame player's
+   *  getVideoData().author is often empty until playback starts, so it can't be relied on. */
+  async function videoInfo(videoId) {
+    try {
+      const res = await fetch('https://www.youtube.com/oembed?format=json&url=' +
+        encodeURIComponent('https://www.youtube.com/watch?v=' + videoId));
+      if (!res.ok) return null;
+      const j = await res.json();
+      return { title: j.title || '', author: j.author_name || '' };
+    } catch { return null; }
+  }
+
   /** Search LRCLIB for a YouTube video; returns LRC text or null.
-   *  Only accepts a hit whose title (and artist, when known) match: no lyrics beats wrong lyrics. */
+   *  Only accepts a hit whose title AND artist match. If the artist can't be worked out,
+   *  returns null: a title-only match picks up other songs with the same name. */
   async function searchByTitle(title, duration, author) {
     let track = cleanTitle(title), artist = '';
     const dash = track.indexOf(' - ');
     if (dash > 0) { artist = track.slice(0, dash).trim(); track = track.slice(dash + 3).trim(); }
     else artist = cleanAuthor(author);
-    const res = await fetch('https://lrclib.net/api/search?q=' + encodeURIComponent((artist + ' ' + track).trim()));
+    if (!artist || !track) return null;
+    const res = await fetch('https://lrclib.net/api/search?q=' + encodeURIComponent(artist + ' ' + track));
     if (!res.ok) return null;
     const hits = (await res.json()).filter((h) => h.syncedLyrics && similar(h.trackName, track) &&
-      (!artist || similar(h.artistName, artist)));
+      similar(h.artistName, artist));
     if (!hits.length) return null;
     if (duration > 0) hits.sort((a, b) => Math.abs((a.duration || 0) - duration) - Math.abs((b.duration || 0) - duration));
     return hits[0].syncedLyrics;
@@ -71,5 +85,5 @@
     return searchByTitle(artist + ' - ' + track, duration);
   }
 
-  window.Lyrics = { parseLrc, lineAt, searchByTitle, fetchFor };
+  window.Lyrics = { parseLrc, lineAt, searchByTitle, fetchFor, videoInfo };
 })();
