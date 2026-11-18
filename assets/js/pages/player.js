@@ -47,7 +47,13 @@
     pendingId = null;
     player.cueVideoById(id);
   }
-  function onPlayerState() {
+  function onPlayerState(e) {
+    // A seek requested before first playback (or during an ad) can be dropped: re-apply it.
+    if (e && e.data === YT.PlayerState.PLAYING && st.pendingSeek != null) {
+      const target = st.pendingSeek;
+      if (Math.abs(player.getCurrentTime() - target) > 1.5) player.seekTo(target, true);
+      else st.pendingSeek = null;
+    }
     // Unanalysed song: once the video's title is known, try LRCLIB for lyrics.
     if (!st.song && !st.lines.length && !st.lyricsTried && player.getVideoData) {
       const title = player.getVideoData().title;
@@ -264,7 +270,10 @@
     $('grid').addEventListener('click', (e) => {
       const cell = e.target.closest('.beat');
       if (!cell || !playerReady) return;
-      player.seekTo(st.song.beats[+cell.dataset.i], true);
+      const target = st.song.beats[+cell.dataset.i];
+      st.pendingSeek = target;
+      setTimeout(() => { if (st.pendingSeek === target) st.pendingSeek = null; }, 30000);
+      player.seekTo(target, true);
       player.playVideo();
       st.userScrollUntil = 0;
     });
