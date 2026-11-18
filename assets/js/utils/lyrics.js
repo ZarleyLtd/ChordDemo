@@ -32,14 +32,29 @@
       .replace(/\s+/g, ' ').trim();
   }
 
-  /** Search LRCLIB by a YouTube video title; returns LRC text or null. */
-  async function searchByTitle(title, duration) {
-    const q = cleanTitle(title);
-    const res = await fetch('https://lrclib.net/api/search?q=' + encodeURIComponent(q));
+  const norm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim();
+  const similar = (a, b) => { a = norm(a); b = norm(b); return !!a && !!b && (a.includes(b) || b.includes(a)); };
+
+  /** YouTube channel name -> artist ("Eels - Topic", "EelsVEVO", "Eels Official" -> "Eels"). */
+  function cleanAuthor(author) {
+    return (author || '').replace(/\s*-\s*Topic$/i, '').replace(/VEVO$/i, '')
+      .replace(/\s*(official|music|tv)$/i, '').trim();
+  }
+
+  /** Search LRCLIB for a YouTube video; returns LRC text or null.
+   *  Only accepts a hit whose title (and artist, when known) match: no lyrics beats wrong lyrics. */
+  async function searchByTitle(title, duration, author) {
+    let track = cleanTitle(title), artist = '';
+    const dash = track.indexOf(' - ');
+    if (dash > 0) { artist = track.slice(0, dash).trim(); track = track.slice(dash + 3).trim(); }
+    else artist = cleanAuthor(author);
+    const res = await fetch('https://lrclib.net/api/search?q=' + encodeURIComponent((artist + ' ' + track).trim()));
     if (!res.ok) return null;
-    const hits = (await res.json()).filter((h) => h.syncedLyrics);
+    const hits = (await res.json()).filter((h) => h.syncedLyrics && similar(h.trackName, track) &&
+      (!artist || similar(h.artistName, artist)));
     if (!hits.length) return null;
-    hits.sort((a, b) => Math.abs((a.duration || 0) - duration) - Math.abs((b.duration || 0) - duration));
+    if (duration > 0) hits.sort((a, b) => Math.abs((a.duration || 0) - duration) - Math.abs((b.duration || 0) - duration));
     return hits[0].syncedLyrics;
   }
 
@@ -53,7 +68,7 @@
         if (j.syncedLyrics) return j.syncedLyrics;
       }
     } catch { /* fall through to search */ }
-    return searchByTitle(artist + ' ' + track, duration);
+    return searchByTitle(artist + ' - ' + track, duration);
   }
 
   window.Lyrics = { parseLrc, lineAt, searchByTitle, fetchFor };

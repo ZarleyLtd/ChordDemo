@@ -78,10 +78,11 @@
     updateStripPlay();
     // Unanalysed song: once the video's title is known, try LRCLIB for lyrics.
     if (!st.song && !st.lines.length && !st.lyricsTried && player.getVideoData) {
-      const title = player.getVideoData().title;
+      const data = player.getVideoData();
+      const title = data.title;
       if (title) {
         st.lyricsTried = true;
-        window.Lyrics.searchByTitle(title, player.getDuration() || 0)
+        window.Lyrics.searchByTitle(title, player.getDuration() || 0, data.author)
           .then((lrc) => { if (lrc) { st.lines = window.Lyrics.parseLrc(lrc); st.lineIdx = -2; } else setLyricText('', 'No synced lyrics found', ''); })
           .catch(() => setLyricText('', 'Lyrics lookup failed', ''));
       }
