@@ -9,17 +9,22 @@ A bare-bones Chordify-style demo: a YouTube player, chords on a beat grid, synce
   - **Beat This!** (JKU, ISMIR 2024) for beats and downbeats
   - **BTC** (ISMIR 2019, large vocabulary) for chords, snapped to beats
 
-  It then fetches synced lyrics from **LRCLIB** and writes `songs/<videoId>.json`. The audio is deleted afterwards.
+  It then writes `songs/<videoId>.json` and deletes the audio. Lyrics are **not** stored, because the repo is public. The page fetches synced lyrics live from **LRCLIB**.
 - Songs that haven't been analysed still play, with lyrics only. The page looks the lyrics up on LRCLIB from the video title.
 
-## Run it
+## Use it
 
-```
-analyzer\analyze.bat https://www.youtube.com/watch?v=XXXXXXXXXXX
-npx serve .
-```
+- **Live site:** https://zarleyltd.github.io/ChordDemo/ (GitHub Pages from `main`).
+- **Add a song (on the PC):**
+  ```
+  analyzer\analyze.bat https://www.youtube.com/watch?v=XXXXXXXXXXX
+  ```
+  This analyses the song, then commits and pushes `songs/`. The site updates about a minute later. Use `analyze.bat --no-push <url>` to analyse without publishing.
+- **Local testing:** run `start-demo.bat`, then open http://localhost:3000. Open it in a real browser, not an editor preview, or YouTube refuses to play.
 
-Open http://localhost:3000 on the PC. On a phone on the same Wi-Fi, open the "Network" address that `serve` prints.
+## YouTube ads
+
+During an ad, the IFrame player reports `UNSTARTED` (-1) while `getCurrentTime()` runs on the ad's clock. The page treats that as "ad playing": it freezes the chords and lyrics, and it keeps any tapped seek until the song starts. Ads in the middle of a song haven't been tested yet. `ChordDemoDebug()` in the browser console shows the player state.
 
 ## First-time analyser setup
 
