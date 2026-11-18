@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14161a">
+  <title>ChordDemo</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <select id="songSelect" aria-label="Song"></select>
+      <form id="addForm" class="add">
+        <input id="addInput" type="url" inputmode="url" placeholder="Paste YouTube link" aria-label="YouTube link">
+        <button type="submit">Go</button>
+      </form>
+    </header>
+
+    <div class="stage">
+      <div class="video"><div id="player"></div></div>
+
+      <div class="strip">
+        <div class="now">
+          <div id="nowDiagram" class="diagram"></div>
+          <div id="nowName" class="now-name">–</div>
+        </div>
+        <div class="next">
+          <span class="label">next</span>
+          <div id="nextName" class="next-name"></div>
+          <div id="nextDiagram" class="diagram small"></div>
+        </div>
+      </div>
+
+      <div class="lyrics" aria-live="off">
+        <div id="lyPrev" class="ly prev"></div>
+        <div id="lyNow" class="ly cur"></div>
+        <div id="lyNext" class="ly nxt"></div>
+      </div>
+
+      <div class="controls">
+        <div class="ctl">
+          <span class="label">Capo</span>
+          <button id="capoDown" aria-label="Capo down">−</button>
+          <span id="capoVal" class="val">none</span>
+          <button id="capoUp" aria-label="Capo up">+</button>
+          <button id="bestBtn" class="pill">Best</button>
+        </div>
+        <div class="ctl">
+          <button id="simpleBtn" class="pill toggle" aria-pressed="true">Simple chords</button>
+          <span class="label">Lyrics</span>
+          <button id="offDown" aria-label="Lyrics earlier">−</button>
+          <span id="offsetVal" class="val">0.00s</span>
+          <button id="offUp" aria-label="Lyrics later">+</button>
+        </div>
+      </div>
+      <div id="meta" class="meta"></div>
+    </div>
+
+    <div id="notAnalysed" class="notice" hidden>
+      <p>This song hasn't been analysed yet. You can play it with lyrics now. To get chords and beats, run this on your PC, then reload:</p>
+      <p><code id="cmd"></code> <button id="copyBtn" class="pill">Copy</button></p>
+    </div>
+
+    <main id="grid" class="grid" aria-label="Chords on the beat"></main>
+  </div>
+
+  <script src="assets/js/utils/music.js"></script>
+  <script src="assets/js/utils/lyrics.js"></script>
+  <script src="assets/js/components/chord-diagram.js"></script>
+  <script src="assets/js/pages/player.js"></script>
+  <script src="main.js"></script>
+  <script src="https://www.youtube.com/iframe_api" async></script>
+</body>
+</html>
