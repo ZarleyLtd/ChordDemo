@@ -311,4 +311,9 @@
   }
 
   window.PlayerPage = { init };
+  // Console/debug helper: ChordDemoDebug()
+  window.ChordDemoDebug = () => playerReady && ({
+    state: player.getPlayerState(), time: player.getCurrentTime(), duration: player.getDuration(),
+    video: (player.getVideoData() || {}).video_id, songDuration: st.song && st.song.duration, pendingSeek: st.pendingSeek,
+  });
 })();
