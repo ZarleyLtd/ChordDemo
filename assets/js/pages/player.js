@@ -47,13 +47,18 @@
     pendingId = null;
     player.cueVideoById(id);
   }
-  function onPlayerState(e) {
-    // A seek requested before first playback (or during an ad) can be dropped: re-apply it.
-    if (e && e.data === YT.PlayerState.PLAYING && st.pendingSeek != null) {
-      const target = st.pendingSeek;
-      if (Math.abs(player.getCurrentTime() - target) > 1.5) player.seekTo(target, true);
-      else st.pendingSeek = null;
-    }
+  /** A seek requested before first playback or around an ad can be dropped: re-apply it
+   *  (up to 3 times within 20 s of the tap) while the video plays far from the target. */
+  function checkPendingSeek(raw) {
+    const p = st.pendingSeek;
+    if (!p) return;
+    if (performance.now() - p.at > 20000 || p.tries >= 3) { st.pendingSeek = null; return; }
+    if (player.getPlayerState() !== YT.PlayerState.PLAYING) return;
+    if (performance.now() - (p.last || 0) < 2500) return; // space retries out (an ad may be playing)
+    if (raw < p.t - 2 || raw > p.t + 20) { p.tries++; p.last = performance.now(); player.seekTo(p.t, true); }
+  }
+
+  function onPlayerState() {
     // Unanalysed song: once the video's title is known, try LRCLIB for lyrics.
     if (!st.song && !st.lines.length && !st.lyricsTried && player.getVideoData) {
       const title = player.getVideoData().title;
@@ -70,6 +75,7 @@
   function now() {
     if (!playerReady || !player.getCurrentTime) return 0;
     const raw = player.getCurrentTime() || 0;
+    checkPendingSeek(raw);
     const t = performance.now();
     if (raw !== lastRaw) { lastRaw = raw; clockBase = { t: raw, at: t }; }
     let est = raw;
@@ -271,8 +277,7 @@
       const cell = e.target.closest('.beat');
       if (!cell || !playerReady) return;
       const target = st.song.beats[+cell.dataset.i];
-      st.pendingSeek = target;
-      setTimeout(() => { if (st.pendingSeek === target) st.pendingSeek = null; }, 30000);
+      st.pendingSeek = { t: target, at: performance.now(), tries: 0 };
       player.seekTo(target, true);
       player.playVideo();
       st.userScrollUntil = 0;
