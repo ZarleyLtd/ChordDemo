@@ -6,7 +6,7 @@
     id: null, song: null, capo: 0, simple: true, lyricOffset: 0,
     lines: [], shapes: [], beatIdx: -2, lineIdx: -2, rowTop: -1, userScrollUntil: 0,
   };
-  let player = null, playerReady = false, pendingId = null;
+  let player = null, playerReady = false, pendingId = null, strip = null;
   let clockBase = { t: 0, at: 0 }, lastRaw = -1, shown = 0;
 
   // ---------------------------------------------------------------- prefs (per song, per device)
@@ -147,6 +147,7 @@
     $('bestBtn').disabled = !st.song || best.capo === st.capo;
     $('offsetVal').textContent = (st.lyricOffset > 0 ? '+' : '') + st.lyricOffset.toFixed(2) + 's';
     renderGrid();
+    strip.build(st.shapes);
     st.beatIdx = -2;
     savePrefs();
   }
@@ -191,20 +192,6 @@
     return ans;
   }
 
-  function nextChange(i) {
-    for (let j = Math.max(i, 0) + 1; j < st.shapes.length; j++) {
-      if (st.shapes[j] !== st.shapes[Math.max(i, 0)] && st.shapes[j] !== 'N') return st.shapes[j];
-    }
-    return '';
-  }
-
-  function setChordStrip(cur, next) {
-    $('nowName').textContent = cur && cur !== 'N' ? cur : '–';
-    $('nowDiagram').innerHTML = cur && cur !== 'N' ? window.chordDiagram(cur, 64) : '';
-    $('nextName').textContent = next || '';
-    $('nextDiagram').innerHTML = next ? window.chordDiagram(next, 44) : '';
-  }
-
   // ---------------------------------------------------------------- lyrics
   function setLyricText(prev, cur, next) {
     $('lyPrev').textContent = prev; $('lyNow').textContent = cur; $('lyNext').textContent = next;
@@ -227,9 +214,7 @@
             grid.scrollTo({ top: Math.max(0, top - grid.clientHeight * 0.25), behavior: 'smooth' });
           }
         }
-        // current shape: last chord at or before this beat
-        let cur = i >= 0 ? st.shapes[i] : st.shapes[0];
-        setChordStrip(cur, nextChange(i));
+        strip.setBeat(i);
         st.beatIdx = i;
       }
     }
@@ -307,6 +292,7 @@
 
   async function init() {
     try { st.simple = localStorage.getItem('chorddemo:simple') !== '0'; } catch { /* default on */ }
+    strip = new window.ChordStrip($('chordStrip'));
     wire();
     let songs = [];
     try { songs = await (await fetch('songs/index.json', { cache: 'no-cache' })).json(); } catch { /* none yet */ }
