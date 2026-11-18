@@ -22,6 +22,10 @@ A bare-bones Chordify-style demo: a YouTube player, chords on a beat grid, synce
   This analyses the song, then commits and pushes `songs/`. The site updates about a minute later. Use `analyze.bat --no-push <url>` to analyse without publishing.
 - **Local testing:** run `start-demo.bat`, then open http://localhost:3000. Open it in a real browser, not an editor preview, or YouTube refuses to play.
 
+## Installable app
+
+This uses the Edison-style installable app pattern: `manifest.json`, `sw.js` (network-first, so the cache is only the offline fallback), and icons in `assets/icons/`. Whenever you add a JS or CSS file to the page, add it to `SHELL` in `sw.js` and bump `CACHE` (for example `chorddemo-shell-v2`).
+
 ## YouTube ads
 
 During an ad, the IFrame player reports `UNSTARTED` (-1) while `getCurrentTime()` runs on the ad's clock. The page treats that as "ad playing": it freezes the chords and lyrics, and it keeps any tapped seek until the song starts. Ads in the middle of a song haven't been tested yet. `ChordDemoDebug()` in the browser console shows the player state.
