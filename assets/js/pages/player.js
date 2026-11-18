@@ -49,9 +49,10 @@
   }
   /** A seek requested before first playback or around an ad can be dropped: re-apply it
    *  (up to 3 times within 20 s of the tap) while the video plays far from the target. */
-  function checkPendingSeek(raw) {
+  function checkPendingSeek(raw, inAd) {
     const p = st.pendingSeek;
     if (!p) return;
+    if (inAd) { p.at = performance.now(); return; } // wait for the ad to finish
     if (performance.now() - p.at > 20000 || p.tries >= 3) { st.pendingSeek = null; return; }
     if (player.getPlayerState() !== YT.PlayerState.PLAYING) return;
     if (performance.now() - (p.last || 0) < 2500) return; // space retries out (an ad may be playing)
@@ -75,7 +76,15 @@
   function now() {
     if (!playerReady || !player.getCurrentTime) return 0;
     const raw = player.getCurrentTime() || 0;
-    checkPendingSeek(raw);
+    // During a YouTube ad the player reports UNSTARTED (-1) while the clock runs on the ad's time.
+    const inAd = player.getPlayerState() === YT.PlayerState.UNSTARTED && raw > 0.1;
+    if (inAd !== st.inAd) {
+      st.inAd = inAd;
+      st.beatIdx = -2; st.lineIdx = -2;
+      $('adNote').hidden = !inAd;
+    }
+    checkPendingSeek(raw, inAd);
+    if (inAd) { shown = 0; return 0; }
     const t = performance.now();
     if (raw !== lastRaw) { lastRaw = raw; clockBase = { t: raw, at: t }; }
     let est = raw;
