@@ -164,6 +164,53 @@ def chords_per_beat(beats: np.ndarray, segs, end_time: float) -> list[str]:
     return out
 
 
+PITCH = {"C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5, "F#": 6, "G": 7, "G#": 8, "A": 9, "A#": 10, "B": 11}
+TONES = {  # display suffix -> chord-tone intervals above the root
+    "": (0, 4, 7), "m": (0, 3, 7), "dim": (0, 3, 6), "aug": (0, 4, 8), "m6": (0, 3, 7, 9), "6": (0, 4, 7, 9),
+    "m7": (0, 3, 7, 10), "mMaj7": (0, 3, 7, 11), "maj7": (0, 4, 7, 11), "7": (0, 4, 7, 10),
+    "dim7": (0, 3, 6, 9), "m7b5": (0, 3, 6, 10), "sus2": (0, 2, 7), "sus4": (0, 5, 7),
+}
+SLASH_MIN_SHARE = 0.15   # bass note's share of the bass-register energy on that beat
+SLASH_OVER_ROOT = 1.4    # bass note must be this much stronger than the chord's root
+SLASH_NEAR_TOP = 0.7     # ... and at least this fraction of the loudest bass note (which may be
+                         # the previous chord's bass still ringing, e.g. F under the C/E of a walk-down)
+
+
+def detect_bass(wav: Path, beats: np.ndarray, chords: list[str]) -> list[int]:
+    """Per beat: the bass pitch class (0-11) when the chord is clearly an inversion
+    (bass = another chord tone, e.g. C/E), else -1. The chord model itself has no bass notes."""
+    import librosa
+    y, sr = librosa.load(str(wav), sr=22050, mono=True)
+    tuning = librosa.estimate_tuning(y=y, sr=sr)
+    hop = 256
+    cqt = np.abs(librosa.cqt(y, sr=sr, hop_length=hop, fmin=librosa.note_to_hz("E1"), n_bins=72,
+                             bins_per_octave=36, tuning=tuning))  # E1..E3, 3 bins per semitone
+    pcs = np.zeros((12, cqt.shape[1]))
+    for k in range(cqt.shape[0]):
+        pcs[(4 + (k + 1) // 3) % 12] += cqt[k]
+    times = librosa.frames_to_time(np.arange(cqt.shape[1]), sr=sr, hop_length=hop)
+    out = []
+    for i, b in enumerate(beats):
+        nxt = beats[i + 1] if i + 1 < len(beats) else b + 0.5
+        sel = (times >= b) & (times < b + 0.6 * (nxt - b))  # the on-beat part of the beat
+        name = chords[i]
+        m = re.match(r"^([A-G]#?)(.*)$", name)
+        if not sel.any() or not m or m.group(2) not in TONES:
+            out.append(-1)
+            continue
+        e = pcs[:, sel].mean(axis=1)
+        root = PITCH[m.group(1)]
+        others = [(root + iv) % 12 for iv in TONES[m.group(2)] if iv != 0]
+        bass = max(others, key=lambda k: e[k])  # loudest non-root chord tone
+        share = e[bass] / (e.sum() + 1e-9)
+        if (share >= SLASH_MIN_SHARE and e[bass] >= SLASH_OVER_ROOT * e[root]
+                and e[bass] >= SLASH_NEAR_TOP * e.max()):
+            out.append(bass)
+        else:
+            out.append(-1)
+    return out
+
+
 def regular_bars(down: list[int], n_beats: int) -> list[int]:
     """The downbeat model sometimes flips to 2-beat bars for a section. Find the song's main
     meter, then step through the beats in bars of that length, snapping to a detected
@@ -224,10 +271,12 @@ def analyse(arg: str) -> None:
         beats, downbeats = detect_beats(wav)
         print(f"[{vid}] {len(beats)} beats, {len(downbeats)} bars; detecting chords ...")
         segs = detect_chords(wav)
+        chords = chords_per_beat(beats, segs, duration or segs[-1][1])
+        print(f"[{vid}] detecting bass notes ...")
+        bass = detect_bass(wav, beats, chords)
     finally:
         shutil.rmtree(work, ignore_errors=True)
 
-    chords = chords_per_beat(beats, segs, duration or segs[-1][1])
     down_idx = regular_bars(sorted({int(np.argmin(np.abs(beats - d))) for d in downbeats}), len(beats))
     bpm = round(60 / float(np.median(np.diff(beats))), 1) if len(beats) > 1 else None
     lyr = fetch_lyrics(artist, track, duration)
@@ -238,10 +287,12 @@ def analyse(arg: str) -> None:
         "beats": [round(float(b), 3) for b in beats],
         "downbeats": down_idx,
         "chords": chords,
+        # bass pitch class (0=C .. 11=B) per beat when the chord is an inversion (e.g. C/E), else -1
+        "bass": bass,
         # Lyrics are not stored (the repo is public); the page fetches them live from LRCLIB.
         "lyricsFound": bool(lyr),
         "analysedAt": time.strftime("%Y-%m-%d %H:%M"),
-        "models": {"beats": "Beat This! final0", "chords": "BTC large-vocabulary"},
+        "models": {"beats": "Beat This! final0", "chords": "BTC large-vocabulary", "bass": "bass-register CQT"},
     }
     SONGS_DIR.mkdir(exist_ok=True)
     (SONGS_DIR / f"{vid}.json").write_text(json.dumps(song, separators=(",", ":")), encoding="utf-8")

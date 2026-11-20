@@ -157,7 +157,9 @@
   function refreshChords() {
     const chords = st.song ? st.song.chords : [];
     const tonic = st.song ? st.key.tonic : null;
-    st.shapes = chords.map((c) => window.Music.shapeFor(c, st.capo, st.simple, tonic));
+    st.shapes = st.song
+      ? window.Music.beatShapes(chords, st.song.bass, st.song.downbeats, st.capo, st.simple, tonic)
+      : [];
     $('capoVal').textContent = st.capo === 0 ? 'none' : 'fret ' + st.capo;
     if (st.song) {
       // The key estimate is only used for sharp/flat spelling; it isn't reliable enough to show.
@@ -197,10 +199,12 @@
         if (i === 0 || shape !== st.shapes[i - 1]) {
           cell.textContent = shape === 'N' ? 'N.C.' : shape;
           cell.classList.add('change');
+          if (shape.length > 4) cell.classList.add('long');
           if (shape === 'N') cell.classList.add('nc');
         } else if (i === s && shape !== 'N') {
           cell.textContent = shape; // chord carried over from the previous bar
           cell.classList.add('cont');
+          if (shape.length > 4) cell.classList.add('long');
         }
         bar.appendChild(cell);
       }

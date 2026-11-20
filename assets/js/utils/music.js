@@ -34,6 +34,29 @@
     return c ? format(c.root - capo, c.q, keyTonic == null ? null : keyTonic - capo) : 'N';
   }
 
+  /** Per-beat display shapes including slash bass notes (C/E) from bass[] (pitch class, -1 = none).
+   *  Simplify: slash chords show the plain chord, and a one-beat passing slash chord on a weak
+   *  beat shows the previous chord instead (a walk-down F C/E C reads F F C). */
+  function beatShapes(chords, bass, downbeats, capo, simple, keyTonic) {
+    const down = new Set(downbeats || []);
+    const key = keyTonic == null ? null : keyTonic - capo;
+    const slashAt = (j) => (bass && j >= 0 && j < chords.length && bass[j] != null ? bass[j] : -1);
+    const out = [];
+    for (let i = 0; i < chords.length; i++) {
+      const base = shapeFor(chords[i], capo, simple, keyTonic);
+      const b = slashAt(i);
+      if (b < 0 || base === 'N') { out.push(base); continue; }
+      if (simple) {
+        const sameSlash = (j) => slashAt(j) === b && chords[j] === chords[i];
+        const passing = i > 0 && !down.has(i) && !sameSlash(i - 1) && !sameSlash(i + 1) && out[i - 1] !== 'N';
+        out.push(passing ? out[i - 1] : base);
+      } else {
+        out.push(base + '/' + format(b - capo, '', key));
+      }
+    }
+    return out;
+  }
+
   /** Estimate the key from per-beat chords: {tonic (major, 0-11), minor (bool), name}. */
   function keyOf(chords) {
     const DIA = [[0, '', 1.5], [2, 'm', 1], [4, 'm', 0.8], [5, '', 1.2], [7, '', 1.3], [9, 'm', 1], [10, '', 0.4]];
@@ -74,6 +97,7 @@
 
   /** Returns {frets:[6 numbers], barre:fret|0} or null. */
   function guitarShape(name) {
+    name = (name || '').split('/')[0]; // slash chord (C/E): show the chord's own shape
     if (OPEN[name]) return { frets: toFrets(OPEN[name]), barre: 0 };
     const c = parse(name);
     if (!c) return null;
@@ -100,5 +124,5 @@
     return best;
   }
 
-  window.Music = { parse, simplify, shapeFor, guitarShape, bestCapo, keyOf, format, NAMES };
+  window.Music = { parse, simplify, shapeFor, beatShapes, guitarShape, bestCapo, keyOf, format, NAMES };
 })();

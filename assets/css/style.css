@@ -84,6 +84,7 @@ button { font: inherit; color: inherit; }
 .beat { flex: 1; min-width: 0; height: 64px; border: 0; border-radius: 6px; background: var(--cell);
   font-weight: 700; font-size: 22px; padding: 0 4px; overflow: hidden; white-space: nowrap; cursor: pointer; }
 .beat.change { background: #2f3441; }
+.beat.long { font-size: 16px; }
 .beat.nc { color: var(--muted); font-weight: 400; font-size: 14px; }
 .beat.cont { color: var(--muted); font-weight: 400; }
 .beat.on { background: var(--accent); color: var(--accent-ink); }
