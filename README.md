@@ -9,7 +9,8 @@ A bare-bones Chordify-style demo: a YouTube player, chords on a beat grid, synce
   - **Beat This!** (JKU, ISMIR 2024) for beats and downbeats
   - **BTC** (ISMIR 2019, large vocabulary) for chords, snapped to beats
 
-  It then writes `songs/<videoId>.json` and deletes the audio. Lyrics are **not** stored, because the repo is public. The page fetches synced lyrics live from **LRCLIB**.
+  It then saves the song to the library and deletes the audio. Lyrics are **not** stored. The page fetches synced lyrics live from **LRCLIB**.
+- **Song library** (Supabase): songs live in the `chorddemo.songs` table on the shared CursorSites **Apps** project. The page reads them through the `chorddemo-api` Edge Function (`?action=list`, `?action=song&id=`), and the analyser writes through the same function with a write key. Adding a song is just adding data: no commit or push.
 - Songs that haven't been analysed still play, with lyrics only. The page looks the lyrics up on LRCLIB from the video title.
 
 ## Use it
@@ -19,12 +20,20 @@ A bare-bones Chordify-style demo: a YouTube player, chords on a beat grid, synce
   ```
   analyzer\analyze.bat https://www.youtube.com/watch?v=XXXXXXXXXXX
   ```
-  This analyses the song, then commits and pushes `songs/`. The site updates about a minute later. Use `analyze.bat --no-push <url>` to analyse without publishing.
+  This analyses the song and saves it to the library. Reload the app to see it. Add `--title "…" --artist "…"` to override what YouTube reports, or `--file` to write `songs/<id>.json` locally instead (for testing).
+- **Fix or remove a song:** `analyzer\.venv\Scripts\python.exe analyzer\chorddemo_api.py rename <id> --title "…" --artist "…"`, `… delete <id>`, or `… list`.
+- **Write key:** `analyzer/.env` (git-ignored) holds `CHORDDEMO_API` and `CHORDDEMO_WRITE_KEY`. The same key is the `CHORDDEMO_WRITE_KEY` secret on the Edge Function. Copy this file to any other PC that runs the analyser.
 - **Local testing:** run `start-demo.bat`, then open http://localhost:3000. Open it in a real browser, not an editor preview, or YouTube refuses to play.
 
 ## Installable app
 
 This uses the Edison-style installable app pattern: `manifest.json`, `sw.js` (network-first, so the cache is only the offline fallback), and icons in `assets/icons/`. Whenever you add a JS or CSS file to the page, add it to `SHELL` in `sw.js` and bump `CACHE` (for example `chorddemo-shell-v2`).
+
+## Backend (Supabase)
+
+- Schema migration: `supabase/migrations/`. Apply new ones with the shared-supabase process (never `supabase db push`).
+- Edge Function: `supabase/functions/chorddemo-api/`. Deploy with `supabase functions deploy chorddemo-api --no-verify-jwt`.
+- The schema isn't exposed to PostgREST; only the Edge Function reads and writes it.
 
 ## YouTube ads
 

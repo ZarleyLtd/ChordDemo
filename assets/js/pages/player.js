@@ -9,6 +9,13 @@
   let player = null, playerReady = false, pendingId = null, strip = null;
   let clockBase = { t: 0, at: 0 }, lastRaw = -1, shown = 0;
   let library = [];
+  // Song library lives in Supabase (schema chorddemo), served by the chorddemo-api Edge Function.
+  const API = 'https://yzyipxvlsoxfphwobfkb.supabase.co/functions/v1/chorddemo-api';
+  async function api(params) {
+    const res = await fetch(API + '?' + new URLSearchParams(params), { cache: 'no-cache' });
+    if (!res.ok) throw new Error('chorddemo-api ' + res.status);
+    return res.json();
+  }
   const lib = { sort: 'title' };
 
   // ---------------------------------------------------------------- prefs (per song, per device)
@@ -132,9 +139,7 @@
     showNowTitle();
     cue(id);
     try {
-      const res = await fetch('songs/' + id + '.json', { cache: 'no-cache' });
-      if (!res.ok) throw new Error('not analysed');
-      st.song = await res.json();
+      st.song = (await api({ action: 'song', id })).song;
     } catch { st.song = null; }
     if (st.id !== id) return; // user switched song meanwhile
     if (st.song) {
@@ -398,7 +403,7 @@
     try { st.simple = localStorage.getItem('chorddemo:simple') !== '0'; } catch { /* default on */ }
     strip = new window.ChordStrip($('chordStrip'));
     wire();
-    try { library = await (await fetch('songs/index.json', { cache: 'no-cache' })).json(); } catch { /* none yet */ }
+    try { library = (await api({ action: 'list' })).songs; } catch { /* offline with nothing cached */ }
     const fromHash = (location.hash.match(/v=([A-Za-z0-9_-]{11})/) || [])[1];
     const first = fromHash || (library[0] && library[0].id);
     if (first) openSong(first);

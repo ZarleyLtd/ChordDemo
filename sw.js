@@ -1,9 +1,9 @@
-var CACHE = 'chorddemo-shell-v2';
+var CACHE = 'chorddemo-shell-v3';
+var API_ORIGIN = 'https://yzyipxvlsoxfphwobfkb.supabase.co';
 var SHELL = [
   './',
   './index.html',
   './manifest.json',
-  './songs/index.json',
   './assets/css/style.css',
   './assets/icons/icon.svg',
   './assets/icons/icon-192.png',
@@ -34,16 +34,21 @@ self.addEventListener('activate', function (event) {
   self.clients.claim();
 });
 
-// Network-first for same-origin GETs (app shell and song files); cache is the offline fallback.
-// Other origins (YouTube, LRCLIB) are left alone.
+// Network-first for the app shell and the song library API (Supabase); cache is the offline fallback,
+// so songs opened before stay playable offline. Other origins (YouTube, LRCLIB) are left alone.
 self.addEventListener('fetch', function (event) {
   var url = new URL(event.request.url);
-  if (url.origin !== self.location.origin || event.request.method !== 'GET') return;
+  if (event.request.method !== 'GET') return;
+  var isApi = url.origin === API_ORIGIN && url.pathname.indexOf('/functions/v1/chorddemo-api') === 0;
+  if (url.origin !== self.location.origin && !isApi) return;
   event.respondWith(fetch(event.request).then(function (response) {
-    var copy = response.clone();
-    caches.open(CACHE).then(function (cache) { cache.put(event.request, copy); });
+    if (response.ok) {
+      var copy = response.clone();
+      caches.open(CACHE).then(function (cache) { cache.put(event.request, copy); });
+    }
     return response;
   }).catch(function () {
-    return caches.match(event.request, { ignoreSearch: true });
+    // The API's query string picks the song, so it must match exactly; the shell can ignore it.
+    return caches.match(event.request, { ignoreSearch: !isApi });
   }));
 });

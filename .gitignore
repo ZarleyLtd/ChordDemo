@@ -1,3 +1,8 @@
 analyzer/.venv/
 analyzer/vendor/
 __pycache__/
+
+# Supabase CLI runtime state
+supabase/.temp/
+# Analyser write key (never commit)
+analyzer/.env

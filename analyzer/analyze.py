@@ -1,8 +1,12 @@
 """Analyse a YouTube song for ChordDemo: beats, chords and synced lyrics.
 
 Usage:  analyze.bat <youtube-url-or-id> [more ...]
+        analyze.bat <youtube-url-or-id> --title "Title" --artist "Artist"
 
-Writes ../songs/<videoId>.json and updates ../songs/index.json.
+Saves the song to Supabase (chorddemo.songs, through the chorddemo-api Edge Function),
+so it appears in the app's Song Library on the next reload. No commit or push needed.
+--title / --artist override what YouTube reports (only with a single song).
+--file also writes ../songs/<videoId>.json locally instead of saving (for testing).
 The downloaded audio is kept in a temp folder only while analysing, then deleted.
 """
 import argparse
@@ -257,7 +261,7 @@ def fetch_lyrics(artist: str, track: str, duration: float) -> dict | None:
 
 
 # ---------------------------------------------------------------- main
-def analyse(arg: str) -> None:
+def analyse(arg: str, title: str | None = None, artist_name: str | None = None, to_file: bool = False) -> None:
     vid = video_id(arg)
     t0 = time.time()
     work = Path(tempfile.mkdtemp(prefix="chorddemo-"))
@@ -265,6 +269,7 @@ def analyse(arg: str) -> None:
         print(f"[{vid}] downloading audio ...")
         info, wav = download(vid, work)
         artist, track = artist_and_track(info)
+        artist, track = artist_name or artist, title or track
         duration = float(info.get("duration") or 0)
         print(f"[{vid}] {artist} - {track} ({duration:.0f}s); embeddable={info.get('playable_in_embed')}")
         print(f"[{vid}] detecting beats ...")
@@ -294,19 +299,23 @@ def analyse(arg: str) -> None:
         "analysedAt": time.strftime("%Y-%m-%d %H:%M"),
         "models": {"beats": "Beat This! final0", "chords": "BTC large-vocabulary", "bass": "bass-register CQT"},
     }
-    SONGS_DIR.mkdir(exist_ok=True)
-    (SONGS_DIR / f"{vid}.json").write_text(json.dumps(song, separators=(",", ":")), encoding="utf-8")
-
-    idx_path = SONGS_DIR / "index.json"
-    index = json.loads(idx_path.read_text(encoding="utf-8")) if idx_path.exists() else []
-    index = [s for s in index if s["id"] != vid] + [{"id": vid, "title": track, "artist": artist}]
-    index.sort(key=lambda s: (s["artist"].lower(), s["title"].lower()))
-    idx_path.write_text(json.dumps(index, indent=1), encoding="utf-8")
-    print(f"[{vid}] done in {time.time() - t0:.0f}s, {bpm} bpm -> songs/{vid}.json")
-
+    if to_file:
+        SONGS_DIR.mkdir(exist_ok=True)
+        (SONGS_DIR / f"{vid}.json").write_text(json.dumps(song, separators=(",", ":")), encoding="utf-8")
+        print(f"[{vid}] done in {time.time() - t0:.0f}s, {bpm} bpm -> songs/{vid}.json (not saved to the library)")
+        return
+    from chorddemo_api import save_song
+    save_song(song)
+    print(f"[{vid}] done in {time.time() - t0:.0f}s, {bpm} bpm -> saved to the library: {artist} - {track}")
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("songs", nargs="+", help="YouTube URL or 11-character video id")
-    for a in ap.parse_args().songs:
-        analyse(a)
+    ap.add_argument("--title", help="song title to use instead of YouTube's (single song only)")
+    ap.add_argument("--artist", help="artist to use instead of YouTube's (single song only)")
+    ap.add_argument("--file", action="store_true", help="write songs/<id>.json locally instead of saving to the library")
+    args = ap.parse_args()
+    if (args.title or args.artist) and len(args.songs) > 1:
+        raise SystemExit("--title/--artist only work with a single song")
+    for a in args.songs:
+        analyse(a, args.title, args.artist, args.file)

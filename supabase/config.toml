@@ -1,0 +1,8 @@
+# ChordDemo on the shared CursorSites "Apps" project (yzyipxvlsoxfphwobfkb), schema `chorddemo`.
+# Never run `supabase db push` here: apply migrations with apply_migration / SQL editor (see shared-supabase skill).
+# Edge Function: supabase functions deploy chorddemo-api --no-verify-jwt
+
+project_id = "apps"
+
+[functions.chorddemo-api]
+verify_jwt = false
