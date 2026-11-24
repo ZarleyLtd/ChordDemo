@@ -22,6 +22,7 @@ A bare-bones Chordify-style demo: a YouTube player, chords on a beat grid, synce
   ```
   This analyses the song and saves it to the library. Reload the app to see it. Add `--title "…" --artist "…"` to override what YouTube reports, or `--file` to write `songs/<id>.json` locally instead (for testing).
 - **Fix or remove a song:** `analyzer\.venv\Scripts\python.exe analyzer\chorddemo_api.py rename <id> --title "…" --artist "…"`, `… delete <id>`, or `… list`.
+- **Add a list of songs:** `analyzer\.venv\Scripts\python.exe analyzer\batch_add.py analyzer\batch\<list>.tsv`. Full guide, options and troubleshooting: [docs/ADDING_SONGS.md](docs/ADDING_SONGS.md).
 - **Write key:** `analyzer/.env` (git-ignored) holds `CHORDDEMO_API` and `CHORDDEMO_WRITE_KEY`. The same key is the `CHORDDEMO_WRITE_KEY` secret on the Edge Function. Copy this file to any other PC that runs the analyser.
 - **Local testing:** run `start-demo.bat`, then open http://localhost:3000. Open it in a real browser, not an editor preview, or YouTube refuses to play.
 
