@@ -1,3 +1,5 @@
+@import url('brief-message.css');
+
 :root {
   --bg: #14161a;
   --panel: #1d2026;
@@ -17,15 +19,37 @@ button { font: inherit; color: inherit; }
 .app { display: flex; flex-direction: column; height: 100dvh; max-width: 960px; margin: 0 auto; }
 
 /* header */
-.topbar { display: flex; gap: 8px; padding: 8px 12px; background: var(--panel); flex-wrap: wrap; }
-.topbar select, .add input { min-width: 0; padding: 8px; border-radius: 8px; border: 1px solid var(--line);
-  background: var(--bg); color: var(--text); font: inherit; }
-.topbar select { flex: 1 1 180px; }
-.add { display: flex; gap: 6px; flex: 1 1 180px; min-width: 0; }
-.add input { flex: 1; width: 100%; }
-.add button, .pill, .ctl button { border: 1px solid var(--line); background: var(--cell); border-radius: 8px;
+.topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--panel); }
+.now-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--muted); font-size: 14px; }
+.pill, .ctl button, .add button { border: 1px solid var(--line); background: var(--cell); border-radius: 8px;
   padding: 6px 12px; cursor: pointer; }
-.add button { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.pill.accent, .add button[type="submit"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
+  font-weight: 600; }
+.topbar .pill { flex: none; padding: 8px 12px; }
+
+/* modal dialogs: Song Library and Add New Song */
+.dlg { width: min(560px, calc(100vw - 24px)); max-height: min(80dvh, 640px); padding: 0; border: 1px solid var(--line);
+  border-radius: 14px; background: var(--panel); color: var(--text); flex-direction: column; overflow: hidden; }
+.dlg[open] { display: flex; }
+.dlg-small { max-height: none; }
+.dlg::backdrop { background: rgba(0, 0, 0, .6); }
+.dlg-head { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.dlg-head h2 { flex: 1; margin: 0; font-size: 17px; }
+.dlg-close { padding: 6px 10px; }
+.dlg-input { min-width: 0; padding: 9px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--text); font: inherit; }
+#filterInput { margin: 10px 12px 0; }
+.add-row { display: flex; gap: 6px; padding: 12px; }
+.add-row .dlg-input { flex: 1; width: 100%; }
+.song-list { list-style: none; margin: 0; padding: 6px; overflow-y: auto; flex: 1; }
+.song-list button { display: block; width: 100%; text-align: left; padding: 9px 10px; border: 0; border-radius: 8px;
+  background: none; cursor: pointer; }
+.song-list button:hover, .song-list button:focus-visible { background: var(--cell); }
+.song-list button.current { background: var(--cell); box-shadow: inset 3px 0 0 var(--accent); }
+.song-list .main { display: block; font-weight: 600; }
+.song-list .sub { display: block; font-size: 13px; color: var(--muted); }
+.song-list .empty { padding: 14px 10px; color: var(--muted); }
 
 /* stage: video + chord strip + lyrics + controls (fixed above the scrolling grid) */
 .stage { flex: none; }
@@ -57,7 +81,10 @@ button { font: inherit; color: inherit; }
 .chord-svg .open { fill: none; stroke: var(--text); stroke-width: 1.2; }
 .chord-svg .mark, .chord-svg .fret-no { fill: var(--muted); font-size: 9px; }
 
-.lyrics { padding: 2px 16px 6px; text-align: center; min-height: 72px; }
+.lyrics-row { display: flex; align-items: center; gap: 4px; padding: 0 6px; }
+.lyrics { flex: 1; min-width: 0; padding: 2px 4px 6px; text-align: center; min-height: 72px; }
+.ly-adj { flex: none; width: 36px; height: 36px; padding: 0; border: 1px solid var(--line); border-radius: 50%;
+  background: var(--cell); font-size: 20px; line-height: 1; cursor: pointer; }
 .ly { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .2s; }
 .ly.prev, .ly.nxt { color: var(--muted); font-size: 13px; min-height: 18px; }
 .ly.cur { font-size: 19px; font-weight: 600; min-height: 26px; }
@@ -66,6 +93,7 @@ button { font: inherit; color: inherit; }
 
 .controls { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 4px 12px 6px; border-top: 1px solid var(--line); }
 .ctl { display: flex; align-items: center; gap: 6px; }
+.ctl-end { margin-left: auto; }
 .ctl button { padding: 4px 10px; min-width: 34px; }
 .val { min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; }
 .pill:disabled { opacity: .45; cursor: default; }

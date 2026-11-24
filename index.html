@@ -13,12 +13,34 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <select id="songSelect" aria-label="Song"></select>
-      <form id="addForm" class="add">
-        <input id="addInput" type="url" inputmode="url" placeholder="Paste YouTube link" aria-label="YouTube link">
-        <button type="submit">Go</button>
-      </form>
+      <button id="libraryBtn" class="pill lib-btn" type="button">Song Library</button>
+      <span id="nowTitle" class="now-title"></span>
+      <button id="addBtn" class="pill accent" type="button">Add New Song</button>
     </header>
+
+    <dialog id="libraryDlg" class="dlg" aria-labelledby="libraryHead">
+      <div class="dlg-head">
+        <h2 id="libraryHead">Song Library</h2>
+        <button id="sortBtn" class="pill" type="button" aria-label="Change sort order">Sort: Title</button>
+        <button id="filterBtn" class="pill toggle" type="button" aria-pressed="false">Filter</button>
+        <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+      </div>
+      <input id="filterInput" class="dlg-input" type="search" placeholder="Type to filter by title or artist" aria-label="Filter songs" autocomplete="off" hidden>
+      <ul id="songList" class="song-list"></ul>
+    </dialog>
+
+    <dialog id="addDlg" class="dlg dlg-small" aria-labelledby="addHead">
+      <form id="addForm" class="add" method="dialog">
+        <div class="dlg-head">
+          <h2 id="addHead">Add New Song</h2>
+          <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+        </div>
+        <div class="add-row">
+          <input id="addInput" class="dlg-input" type="url" inputmode="url" placeholder="Paste YouTube link" aria-label="YouTube link">
+          <button type="submit">Go</button>
+        </div>
+      </form>
+    </dialog>
 
     <div class="stage">
       <div class="video"><div id="player"></div></div>
@@ -30,10 +52,14 @@
         </div>
       </div>
 
-      <div class="lyrics" aria-live="off">
-        <div id="lyPrev" class="ly prev"></div>
-        <div id="lyNow" class="ly cur"></div>
-        <div id="lyNext" class="ly nxt"></div>
+      <div class="lyrics-row">
+        <button id="offDown" class="ly-adj" type="button" aria-label="Lyrics earlier">−</button>
+        <div class="lyrics" aria-live="off">
+          <div id="lyPrev" class="ly prev"></div>
+          <div id="lyNow" class="ly cur"></div>
+          <div id="lyNext" class="ly nxt"></div>
+        </div>
+        <button id="offUp" class="ly-adj" type="button" aria-label="Lyrics later">+</button>
       </div>
 
       <div class="controls">
@@ -44,12 +70,8 @@
           <button id="capoUp" aria-label="Capo up">+</button>
           <button id="bestBtn" class="pill">Best</button>
         </div>
-        <div class="ctl">
+        <div class="ctl ctl-end">
           <button id="simpleBtn" class="pill toggle" aria-pressed="true">Simplify</button>
-          <span class="label">Lyrics</span>
-          <button id="offDown" aria-label="Lyrics earlier">−</button>
-          <span id="offsetVal" class="val">0.00s</span>
-          <button id="offUp" aria-label="Lyrics later">+</button>
         </div>
       </div>
       <div id="meta" class="meta"></div>
@@ -63,6 +85,7 @@
     <main id="grid" class="grid" aria-label="Chords on the beat"></main>
   </div>
 
+  <script src="assets/js/utils/brief-message.js"></script>
   <script src="assets/js/utils/music.js"></script>
   <script src="assets/js/utils/lyrics.js"></script>
   <script src="assets/js/components/chord-diagram.js"></script>

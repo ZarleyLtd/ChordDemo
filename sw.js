@@ -1,4 +1,4 @@
-var CACHE = 'chorddemo-shell-v1';
+var CACHE = 'chorddemo-shell-v2';
 var SHELL = [
   './',
   './index.html',
@@ -8,6 +8,8 @@ var SHELL = [
   './assets/icons/icon.svg',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
+  './assets/css/brief-message.css',
+  './assets/js/utils/brief-message.js',
   './assets/js/utils/music.js',
   './assets/js/utils/lyrics.js',
   './assets/js/components/chord-diagram.js',
