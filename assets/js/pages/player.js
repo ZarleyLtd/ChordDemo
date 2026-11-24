@@ -5,6 +5,9 @@
   const st = {
     id: null, song: null, capo: 0, simple: true, lyricOffset: 0,
     lines: [], shapes: [], beatIdx: -2, lineIdx: -2, rowTop: -1, userScrollUntil: 0,
+    loop: null,        // { a, b, start, end }: beat indices and times; playback repeats start..end
+    loopSetup: null,   // null when off; { first: null | beat index } while picking the two beats
+    loopSeekAt: 0,
   };
   let player = null, playerReady = false, pendingId = null, strip = null;
   let clockBase = { t: 0, at: 0 }, lastRaw = -1, shown = 0;
@@ -133,6 +136,7 @@
   async function openSong(id) {
     st.id = id; st.song = null; st.lines = []; st.lyricsTried = false;
     st.beatIdx = -2; st.lineIdx = -2; st.rowTop = -1;
+    st.loop = null; st.loopSetup = null; updateLoopUi();
     const p = loadPrefs(id);
     st.capo = p.capo || 0; st.lyricOffset = p.lyricOffset || 0;
     if (location.hash !== '#v=' + id) history.replaceState(null, '', '#v=' + id);
@@ -180,6 +184,7 @@
     $('bestBtn').textContent = 'Best: ' + (best.capo === 0 ? 'no capo' : best.capo);
     $('bestBtn').disabled = !st.song || best.capo === st.capo;
     renderGrid();
+    markLoop();
     strip.build(st.shapes);
     st.beatIdx = -2;
     savePrefs();
@@ -235,6 +240,7 @@
   // ---------------------------------------------------------------- frame loop
   function frame() {
     const t = now();
+    keepLooping(t);
     if (st.song && st.song.beats.length) {
       const i = beatAt(t);
       if (i !== st.beatIdx) {
@@ -277,6 +283,73 @@
     requestAnimationFrame(frame);
   }
 
+  // ---------------------------------------------------------------- loop between two beats
+  function updateLoopUi() {
+    $('loopBtn').setAttribute('aria-pressed', String(!!(st.loop || st.loopSetup)));
+    $('grid').classList.toggle('loop-setup', !!st.loopSetup);
+    markLoop();
+  }
+
+  function markLoop() {
+    const grid = $('grid');
+    grid.querySelectorAll('.loop-start, .in-loop').forEach((c) => c.classList.remove('loop-start', 'in-loop'));
+    if (st.loopSetup && st.loopSetup.first != null) {
+      grid.querySelector(`.beat[data-i="${st.loopSetup.first}"]`)?.classList.add('loop-start');
+    }
+    if (st.loop) {
+      for (let i = st.loop.a; i <= st.loop.b; i++) grid.querySelector(`.beat[data-i="${i}"]`)?.classList.add('in-loop');
+    }
+  }
+
+  function seekTo(t) {
+    st.pendingSeek = { t, at: performance.now(), tries: 0 };
+    player.seekTo(t, true);
+    player.playVideo();
+    st.userScrollUntil = 0;
+  }
+
+  function onLoopButton(btn) {
+    if (st.loop || st.loopSetup) {
+      st.loop = null; st.loopSetup = null; updateLoopUi();
+      window.BriefMessage.show('Loop off', btn);
+      return;
+    }
+    if (!st.song) { window.BriefMessage.show('Loop needs an analysed song', btn); return; }
+    st.loopSetup = { first: null }; updateLoopUi();
+    window.BriefMessage.show('Tap the first beat', btn, { durationMs: 1500 });
+  }
+
+  /** Grid tap while picking the loop: first tap marks one end, second sets the loop and starts it. */
+  function pickLoopBeat(i, cell) {
+    if (st.loopSetup.first == null) {
+      st.loopSetup.first = i; markLoop();
+      window.BriefMessage.show('Now tap the last beat', cell, { durationMs: 1500 });
+      return;
+    }
+    const a = Math.min(st.loopSetup.first, i), b = Math.max(st.loopSetup.first, i);
+    const beats = st.song.beats;
+    // Play through the whole of the last beat: stop where the next beat would start.
+    const end = b + 1 < beats.length ? beats[b + 1]
+      : (st.song.duration || beats[b] + (beats[b] - (beats[b - 1] ?? beats[b] - 0.5)));
+    st.loop = { a, b, start: beats[a], end };
+    st.loopSetup = null; updateLoopUi();
+    window.BriefMessage.show(`Looping ${b - a + 1} beats`, cell);
+    seekTo(st.loop.start);
+  }
+
+  /** Called every frame: jump back to the loop start as soon as playback reaches the loop end. */
+  function keepLooping(t) {
+    const L = st.loop;
+    if (!L || !playerReady || st.inAd || player.getPlayerState() !== YT.PlayerState.PLAYING) return;
+    if (performance.now() - st.loopSeekAt < 400) return; // let the last jump land first
+    if (t >= L.end - 0.04) { // a few ms early, to cover the seek delay
+      st.loopSeekAt = performance.now();
+      st.pendingSeek = null;
+      shown = 0; lastRaw = -1; // don't let the flicker guard hold the clock at the loop end
+      player.seekTo(L.start, true);
+    }
+  }
+
   // ---------------------------------------------------------------- song library + add dialogs
   function showNowTitle() {
     const s = st.song || library.find((x) => x.id === st.id);
@@ -291,10 +364,23 @@
       .filter((s) => !q || s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q))
       .sort((a, b) => a[by].localeCompare(b[by], undefined, { sensitivity: 'base' })
         || a[other].localeCompare(b[other], undefined, { sensitivity: 'base' }));
+    const cur = (s) => (s.id === st.id ? ' current' : '');
+    let html, lastArtist = null;
+    if (by === 'artist') {
+      // Artist header, then that artist's songs (titles only), indented beneath it.
+      html = rows.map((s) => {
+        const key = s.artist.toLowerCase();
+        const head = key === lastArtist ? '' : `<li class="artist-head">${esc(s.artist)}</li>`;
+        lastArtist = key;
+        return head + `<li><button type="button" class="in-group${cur(s)}" data-id="${esc(s.id)}">`
+          + `<span class="main">${esc(s.title)}</span></button></li>`;
+      }).join('');
+    } else {
+      html = rows.map((s) => `<li><button type="button" class="${cur(s).trim()}" data-id="${esc(s.id)}">`
+        + `<span class="main">${esc(s.title)}</span><span class="sub">${esc(s.artist)}</span></button></li>`).join('');
+    }
     $('songList').innerHTML = rows.length
-      ? rows.map((s) => `<li><button type="button" data-id="${esc(s.id)}"${s.id === st.id ? ' class="current"' : ''}>`
-        + `<span class="main">${esc(s[by])}</span><span class="sub">${esc(s[other])}</span></button></li>`).join('')
-      : `<li class="empty">${library.length ? 'No songs match' : 'No songs yet'}</li>`;
+      ? html : `<li class="empty">${library.length ? 'No songs match' : 'No songs yet'}</li>`;
   }
 
   function openLibrary() {
@@ -368,7 +454,10 @@
     $('chordStrip').addEventListener('keydown', (e) => {
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePlay(); }
     });
-    $('simpleBtn').addEventListener('click', () => { st.simple = !st.simple; refreshChords(); });
+    $('simpleBtn').addEventListener('click', (e) => {
+      st.simple = !st.simple; refreshChords();
+      window.BriefMessage.show('Simplify chords ' + (st.simple ? 'ON' : 'OFF'), e.currentTarget);
+    });
     const nudgeLyrics = (delta, btn) => {
       st.lyricOffset = Math.round((st.lyricOffset + delta) * 100) / 100;
       st.lineIdx = -2; refreshChords();
@@ -379,12 +468,15 @@
     $('grid').addEventListener('click', (e) => {
       const cell = e.target.closest('.beat');
       if (!cell || !playerReady) return;
-      const target = st.song.beats[+cell.dataset.i];
-      st.pendingSeek = { t: target, at: performance.now(), tries: 0 };
-      player.seekTo(target, true);
-      player.playVideo();
-      st.userScrollUntil = 0;
+      const i = +cell.dataset.i;
+      if (st.loopSetup) { pickLoopBeat(i, cell); return; }
+      if (st.loop && (i < st.loop.a || i > st.loop.b)) { // tapping outside the loop ends it
+        st.loop = null; updateLoopUi();
+        window.BriefMessage.show('Loop off', cell);
+      }
+      seekTo(st.song.beats[i]);
     });
+    $('loopBtn').addEventListener('click', (e) => onLoopButton(e.currentTarget));
     const pauseAutoScroll = () => { st.userScrollUntil = performance.now() + 4000; };
     $('grid').addEventListener('touchstart', pauseAutoScroll, { passive: true });
     $('grid').addEventListener('wheel', pauseAutoScroll, { passive: true });

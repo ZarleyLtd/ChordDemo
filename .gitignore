@@ -6,3 +6,5 @@ __pycache__/
 supabase/.temp/
 # Analyser write key (never commit)
 analyzer/.env
+# Personal batch lists and logs
+analyzer/batch/

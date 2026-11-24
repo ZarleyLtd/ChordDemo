@@ -27,6 +27,8 @@ button { font: inherit; color: inherit; }
 .pill.accent, .add button[type="submit"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
   font-weight: 600; }
 .topbar .pill { flex: none; padding: 8px 12px; }
+.topbar .icon-btn { display: flex; align-items: center; justify-content: center; width: 44px; height: 40px; padding: 0; }
+.icon-btn svg { display: block; }
 
 /* modal dialogs: Song Library and Add New Song */
 .dlg { width: min(560px, calc(100vw - 24px)); max-height: min(80dvh, 640px); padding: 0; border: 1px solid var(--line);
@@ -50,6 +52,10 @@ button { font: inherit; color: inherit; }
 .song-list .main { display: block; font-weight: 600; }
 .song-list .sub { display: block; font-size: 13px; color: var(--muted); }
 .song-list .empty { padding: 14px 10px; color: var(--muted); }
+.song-list .artist-head { position: sticky; top: -6px; z-index: 1; padding: 10px 10px 4px; background: var(--panel);
+  font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.song-list button.in-group { padding: 7px 10px 7px 24px; }
+.song-list button.in-group .main { font-weight: 500; }
 
 /* stage: video + chord strip + lyrics + controls (fixed above the scrolling grid) */
 .stage { flex: none; }
@@ -94,6 +100,13 @@ button { font: inherit; color: inherit; }
 .controls { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 4px 12px 6px; border-top: 1px solid var(--line); }
 .ctl { display: flex; align-items: center; gap: 6px; }
 .ctl-end { margin-left: auto; }
+.ctl .icon-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 34px; padding: 0; }
+
+/* loop: setup mode highlights the grid; the chosen range is underlined */
+.grid.loop-setup .beat { outline: 1px dashed var(--muted); outline-offset: -3px; }
+.beat.loop-start { box-shadow: inset 0 0 0 2px var(--accent); }
+.beat.in-loop { box-shadow: inset 0 -4px 0 var(--accent); }
+.beat.in-loop.on { box-shadow: inset 0 -4px 0 var(--accent-ink); }
 .ctl button { padding: 4px 10px; min-width: 34px; }
 .val { min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; }
 .pill:disabled { opacity: .45; cursor: default; }
