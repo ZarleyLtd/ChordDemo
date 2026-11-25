@@ -388,12 +388,22 @@
         : favsOnly && !q ? 'No favourites yet' : 'No songs match'}</li>`;
   }
 
+  /** A modal dialog is centred vertically, so a shorter or longer list moves its top. Fix the top
+   *  where it is now, so the header (and the button just tapped) stays put as the list changes. */
+  function pinTop(dlg) {
+    const top = dlg.getBoundingClientRect().top;
+    dlg.style.margin = `${top}px auto auto`;
+    dlg.style.maxHeight = `min(80dvh, 640px, calc(100dvh - ${top + 12}px))`; // don't run off the bottom
+  }
+
   function openLibrary() {
     // Always start on the full list: clear and hide any filter left from last time.
     $('filterInput').value = '';
     $('filterInput').hidden = true;
     $('filterBtn').setAttribute('aria-pressed', 'false');
     lib.favsOnly = false;
+    // Back to the browser's default vertical centring (pinTop may have fixed the top last time).
+    $('libraryDlg').style.margin = ''; $('libraryDlg').style.maxHeight = '';
     renderLibrary();
     $('libraryDlg').showModal();
     const cur = $('songList').querySelector('.current');
@@ -425,6 +435,7 @@
         return;
       }
       lib.favsOnly = !lib.favsOnly;
+      pinTop($('libraryDlg'));
       renderLibrary();
     });
     $('songList').addEventListener('click', (e) => {
