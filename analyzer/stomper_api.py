@@ -9,6 +9,7 @@ Command line (run with the analyser's Python):
     python stomper_api.py rename <videoId> --title "New title" --artist "New artist"
     python stomper_api.py delete <videoId>
     python stomper_api.py import <song.json> [...]
+    python stomper_api.py invite [--admin] [--label "Who it's for"]   (one-time code to register in the app)
 """
 import argparse
 import json
@@ -57,6 +58,10 @@ def delete_song(vid: str) -> None:
     _post({"action": "delete", "id": vid})
 
 
+def create_invite(admin: bool, label: str | None) -> dict:
+    return _post({"action": "invite", "isAdmin": admin, "label": label})
+
+
 def list_songs() -> list[dict]:
     url, _ = _config()
     r = requests.get(url, params={"action": "list"}, timeout=30)
@@ -71,6 +76,7 @@ if __name__ == "__main__":
     p = sub.add_parser("rename"); p.add_argument("id"); p.add_argument("--title"); p.add_argument("--artist")
     p = sub.add_parser("delete"); p.add_argument("id")
     p = sub.add_parser("import"); p.add_argument("files", nargs="+")
+    p = sub.add_parser("invite"); p.add_argument("--admin", action="store_true"); p.add_argument("--label")
     a = ap.parse_args()
     if a.cmd == "list":
         for s in list_songs():
@@ -83,4 +89,8 @@ if __name__ == "__main__":
         for f in a.files:
             s = json.loads(Path(f).read_text(encoding="utf-8"))
             save_song(s); print("imported", s["id"], "-", s["artist"], "-", s["title"])
+    elif a.cmd == "invite":
+        inv = create_invite(a.admin, a.label)
+        kind = "Admin" if inv["isAdmin"] else "User"
+        print(f"{kind} invite code: {inv['code']}  (one use, expires {inv['expiresAt']})")
     sys.exit(0)

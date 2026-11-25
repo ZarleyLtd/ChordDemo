@@ -1,4 +1,4 @@
-var CACHE = 'stomper-shell-v1';
+var CACHE = 'stomper-shell-v2';
 var API_ORIGIN = 'https://yzyipxvlsoxfphwobfkb.supabase.co';
 var SHELL = [
   './',
@@ -10,11 +10,13 @@ var SHELL = [
   './assets/icons/icon-512.png',
   './assets/icons/jpLogo-white-rotated-2000.png',
   './assets/css/brief-message.css',
+  './assets/js/config/api.js',
   './assets/js/utils/brief-message.js',
   './assets/js/utils/music.js',
   './assets/js/utils/lyrics.js',
   './assets/js/components/chord-diagram.js',
   './assets/js/components/chord-strip.js',
+  './assets/js/components/account.js',
   './assets/js/pages/player.js',
   './main.js'
 ];

@@ -29,6 +29,7 @@ button { font: inherit; color: inherit; }
 .topbar .pill { flex: none; padding: 8px 12px; }
 .topbar .icon-btn { display: flex; align-items: center; justify-content: center; width: 44px; height: 40px; padding: 0; }
 .icon-btn svg { display: block; }
+.account-btn.signed-in { color: var(--accent); border-color: var(--accent); }
 
 /* modal dialogs: Song Library and Add New Song */
 .dlg { width: min(560px, calc(100vw - 24px)); max-height: min(80dvh, 640px); padding: 0; border: 1px solid var(--line);
@@ -38,6 +39,9 @@ button { font: inherit; color: inherit; }
 .dlg::backdrop { background: rgba(0, 0, 0, .6); }
 .dlg-head { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
 .dlg-head h2 { flex: 1; margin: 0; font-size: 17px; }
+#libraryDlg .dlg-head h2 { flex: none; }
+.dlg-head .add-song { width: 34px; height: 32px; padding: 0; margin-right: auto; display: flex; align-items: center;
+  justify-content: center; }
 .dlg-close { padding: 6px 10px; }
 .dlg-input { min-width: 0; padding: 9px; border-radius: 8px; border: 1px solid var(--line);
   background: var(--bg); color: var(--text); font: inherit; }
@@ -111,6 +115,7 @@ button { font: inherit; color: inherit; }
 .val { min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; }
 .pill:disabled { opacity: .45; cursor: default; }
 .toggle[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.fav-btn[aria-pressed="true"] svg { fill: currentColor; }
 .meta { padding: 0 16px 6px; font-size: 12px; color: var(--muted); }
 
 .notice { margin: 8px 12px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 10px; font-size: 14px; }
@@ -135,3 +140,39 @@ button { font: inherit; color: inherit; }
   padding-bottom: max(6px, env(safe-area-inset-bottom)); background: var(--panel); border-top: 1px solid var(--line);
   color: var(--muted); font-size: 13px; }
 .footer-logo { display: block; height: 22px; width: auto; }
+
+/* user accounts: connect / register / reset forms and the account panel */
+.dlg-body { display: flex; flex-direction: column; gap: 10px; padding: 12px; overflow-y: auto; }
+.acct-form { display: flex; flex-direction: column; min-height: 0; }
+.acct-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.acct-form .dlg-input { color: var(--text); font-size: 15px; }
+.acct-note { margin: 0; font-size: 14px; color: var(--muted); }
+.acct-msg { margin: 0; font-size: 14px; color: var(--muted); }
+.acct-msg.err { color: #ff8a8a; }
+.acct-msg.ok { color: #7bd88f; }
+.acct-submit { padding: 10px 12px; }
+.acct-links { display: flex; justify-content: space-between; gap: 8px; margin: 0; flex-wrap: wrap; }
+.link-btn { border: 0; padding: 4px 0; background: none; color: var(--accent); cursor: pointer; font-size: 14px; }
+.acct-who { display: flex; align-items: center; gap: 10px; }
+.acct-handle { font-size: 20px; font-weight: 700; }
+.acct-badge { padding: 2px 8px; border-radius: 999px; background: var(--cell); border: 1px solid var(--line);
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.acct-badge.admin { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.acct-actions { display: flex; gap: 8px; }
+.acct-section { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px;
+  font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.invite-form { display: flex; gap: 6px; flex-wrap: wrap; }
+.invite-form input { flex: 1 1 160px; }
+.issued { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px dashed var(--accent);
+  border-radius: 10px; }
+.issued-what { font-size: 13px; color: var(--muted); }
+.issued-row { display: flex; align-items: center; gap: 8px; }
+.issued-code { flex: 1; font-size: 22px; font-weight: 700; letter-spacing: .12em; user-select: all; }
+.acct-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.acct-list .empty { color: var(--muted); font-size: 14px; }
+.acct-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--cell); }
+.acct-row-main { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.acct-row-sub { display: block; font-size: 12px; color: var(--muted); }
+.acct-row .muted { color: var(--muted); font-weight: 400; }
+.acct-row .type-select { padding: 5px 6px; }
+.acct-row .pill { flex: none; padding: 5px 10px; font-size: 13px; }

@@ -8,11 +8,23 @@
  *   POST { action: "save",   key, song }
  *   POST { action: "update", key, id, title?, artist? }
  *   POST { action: "delete", key, id }
+ *   POST { action: "invite", key, isAdmin?, label? }   -> { code }  (bootstraps the first admin)
+ *
+ * User accounts (Connect-style, see accounts.ts). The browser POSTs a JSON string as text/plain:
+ *   register { inviteCode, handle, password }  -> { sessionToken, account }
+ *   connect  { handle, password }              -> { sessionToken, account }
+ *   resetPassword { handle, resetCode, newPassword }
+ *   whoAmI / signOut { token }
+ * Signed in ({ token }): listFavourites -> { favourites: [videoId] }, setFavourite { songId, on }
+ * Admin only ({ token } of an admin account):
+ *   listAccounts, setAccountType { accountId, isAdmin },
+ *   listInvites, issueInvite { purpose: register|reset, isAdmin?, label?, accountId? }, revokeInvite { inviteId }
  *
  * Secrets: SUPABASE_DB_URL (provided by Supabase), STOMPER_WRITE_KEY.
  * Deploy:  supabase functions deploy stomper-api --no-verify-jwt
  */
 import postgres from "https://deno.land/x/postgresjs@v3.4.4/mod.js";
+import * as accounts from "./accounts.ts";
 
 const ID_RE = /^[A-Za-z0-9_-]{11}$/;
 const cors: Record<string, string> = {
@@ -111,7 +123,23 @@ Deno.serve(async (req) => {
     }
     if (req.method === "POST") {
       const b = await req.json().catch(() => ({}));
+      const sql = db();
+      switch (b.action) {
+        case "register": return json(await accounts.register(sql, req, b));
+        case "connect": return json(await accounts.connect(sql, req, b));
+        case "resetPassword": return json(await accounts.resetPassword(sql, req, b));
+        case "signOut": return json(await accounts.signOut(sql, b.token));
+        case "whoAmI": return json(await accounts.whoAmI(sql, b.token));
+        case "listAccounts": return json(await accounts.listAccounts(sql, b));
+        case "setAccountType": return json(await accounts.setAccountType(sql, b));
+        case "listInvites": return json(await accounts.listInvites(sql, b));
+        case "issueInvite": return json(await accounts.issueInvite(sql, b));
+        case "revokeInvite": return json(await accounts.revokeInvite(sql, b));
+        case "listFavourites": return json(await accounts.listFavourites(sql, b));
+        case "setFavourite": return json(await accounts.setFavourite(sql, b));
+      }
       requireKey(b.key);
+      if (b.action === "invite") return json(await accounts.createInvite(sql, { ...b, purpose: "register" }, null));
       if (b.action === "save") return json(await save(b.song));
       if (b.action === "update") return json(await update(b));
       if (b.action === "delete") return json(await remove(requireId(b.id)));

@@ -2,4 +2,7 @@
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('sw.js').catch(function () {});
 }
-document.addEventListener('DOMContentLoaded', () => window.PlayerPage.init());
+document.addEventListener('DOMContentLoaded', () => {
+  window.Account.init();
+  window.PlayerPage.init();
+});

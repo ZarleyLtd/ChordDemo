@@ -35,15 +35,21 @@
         </svg>
       </button>
       <span id="nowTitle" class="now-title"></span>
-      <button id="addBtn" class="pill accent icon-btn" type="button" aria-label="Add New Song" title="Add New Song">
+      <button id="accountBtn" class="pill icon-btn account-btn" type="button" aria-label="Connect" title="Connect">
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor"
-          stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>
+        </svg>
       </button>
     </header>
 
     <dialog id="libraryDlg" class="dlg" aria-labelledby="libraryHead">
       <div class="dlg-head">
         <h2 id="libraryHead">Song Library</h2>
+        <button id="addBtn" class="pill accent icon-btn add-song" type="button" aria-label="Add New Song" title="Add New Song">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor"
+            stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
         <button id="sortBtn" class="pill" type="button" aria-label="Change sort order">Sort: Title</button>
         <button id="filterBtn" class="pill toggle" type="button" aria-pressed="false">Filter</button>
         <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
@@ -63,6 +69,104 @@
           <button type="submit">Go</button>
         </div>
       </form>
+    </dialog>
+
+    <!-- User accounts (Connect-style): connect, register with an invite, reset with a reset code, account panel -->
+    <dialog id="connectDlg" class="dlg dlg-small" aria-labelledby="connectHead">
+      <form id="connectForm" class="acct-form">
+        <div class="dlg-head">
+          <h2 id="connectHead">Connect</h2>
+          <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+        </div>
+        <div class="dlg-body">
+          <label>Handle <input id="connectHandle" class="dlg-input" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+          <label>Password <input id="connectPassword" class="dlg-input" type="password" autocomplete="current-password" required></label>
+          <p id="connectMsg" class="acct-msg" hidden></p>
+          <button class="pill accent acct-submit" type="submit">Connect</button>
+          <p class="acct-links">
+            <button id="toRegister" class="link-btn" type="button">Register with an invite code</button>
+            <button id="toReset" class="link-btn" type="button">Forgot password</button>
+          </p>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="registerDlg" class="dlg dlg-small" aria-labelledby="registerHead">
+      <form id="registerForm" class="acct-form">
+        <div class="dlg-head">
+          <h2 id="registerHead">Register</h2>
+          <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+        </div>
+        <div class="dlg-body">
+          <p class="acct-note">An admin gives you a one-time invite code. Then choose a handle and password.</p>
+          <label>Invite code <input id="registerCode" class="dlg-input" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required></label>
+          <label>Handle <input id="registerHandle" class="dlg-input" autocomplete="username" autocapitalize="none" spellcheck="false"
+            required pattern="[A-Za-z0-9]{3,20}" title="3 to 20 letters or digits, no spaces"></label>
+          <label>Password <input id="registerPassword" class="dlg-input" type="password" autocomplete="new-password" required minlength="8"></label>
+          <label>Confirm password <input id="registerPassword2" class="dlg-input" type="password" autocomplete="new-password" required minlength="8"></label>
+          <p id="registerMsg" class="acct-msg" hidden></p>
+          <button class="pill accent acct-submit" type="submit">Register</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="resetDlg" class="dlg dlg-small" aria-labelledby="resetHead">
+      <form id="resetForm" class="acct-form">
+        <div class="dlg-head">
+          <h2 id="resetHead">Reset password</h2>
+          <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+        </div>
+        <div class="dlg-body">
+          <p class="acct-note">Ask an admin for a one-time reset code, then choose a new password.</p>
+          <label>Handle <input id="resetHandle" class="dlg-input" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+          <label>Reset code <input id="resetCode" class="dlg-input" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required></label>
+          <label>New password <input id="resetPassword" class="dlg-input" type="password" autocomplete="new-password" required minlength="8"></label>
+          <p id="resetMsg" class="acct-msg" hidden></p>
+          <button class="pill accent acct-submit" type="submit">Update password</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="accountDlg" class="dlg" aria-labelledby="accountHead">
+      <div class="dlg-head">
+        <h2 id="accountHead">Account</h2>
+        <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+      </div>
+      <div class="dlg-body">
+        <div class="acct-who">
+          <span id="accountHandle" class="acct-handle"></span>
+          <span id="accountType" class="acct-badge"></span>
+        </div>
+        <div class="acct-actions">
+          <button id="switchBtn" class="pill" type="button">Switch account</button>
+          <button id="signOutBtn" class="pill" type="button">Sign out</button>
+        </div>
+
+        <div id="adminPanel" hidden>
+          <h3 class="acct-section">Invite a new user</h3>
+          <form id="inviteForm" class="invite-form">
+            <input id="inviteLabel" class="dlg-input" maxlength="80" placeholder="Who it's for (optional)" aria-label="Who the invite is for">
+            <select id="inviteType" class="dlg-input" aria-label="Account type">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button class="pill accent" type="submit">Issue code</button>
+          </form>
+          <div id="issuedCode" class="issued" hidden>
+            <span id="issuedWhat" class="issued-what"></span>
+            <div class="issued-row">
+              <code id="issuedValue" class="issued-code"></code>
+              <button id="issuedCopy" class="pill" type="button">Copy</button>
+            </div>
+          </div>
+
+          <h3 class="acct-section">Unused codes</h3>
+          <ul id="inviteList" class="acct-list"></ul>
+
+          <h3 class="acct-section">Users</h3>
+          <ul id="userList" class="acct-list"></ul>
+        </div>
+      </div>
     </dialog>
 
     <div class="stage">
@@ -110,6 +214,13 @@
               <path d="M15 14l3 3 3-3"/><path d="M18 11v6"/><path d="M14 20h8"/>
             </svg>
           </button>
+          <button id="favBtn" class="pill toggle icon-btn fav-btn" type="button" aria-pressed="false"
+            aria-label="Favourite" title="Favourite">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linejoin="round">
+              <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.4 1.1 6.2L12 17l-5.6 3 1.1-6.2-4.6-4.4 6.3-.9z"/>
+            </svg>
+          </button>
         </div>
       </div>
       <div id="meta" class="meta"></div>
@@ -127,11 +238,13 @@
     </footer>
   </div>
 
+  <script src="assets/js/config/api.js"></script>
   <script src="assets/js/utils/brief-message.js"></script>
   <script src="assets/js/utils/music.js"></script>
   <script src="assets/js/utils/lyrics.js"></script>
   <script src="assets/js/components/chord-diagram.js"></script>
   <script src="assets/js/components/chord-strip.js"></script>
+  <script src="assets/js/components/account.js"></script>
   <script src="assets/js/pages/player.js"></script>
   <script src="main.js"></script>
   <script src="https://www.youtube.com/iframe_api" async></script>

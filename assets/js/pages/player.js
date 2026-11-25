@@ -12,13 +12,9 @@
   let player = null, playerReady = false, pendingId = null, strip = null;
   let clockBase = { t: 0, at: 0 }, lastRaw = -1, shown = 0;
   let library = [];
+  let favourites = new Set(); // video ids the connected user has marked as favourite
   // Song library lives in Supabase (schema stomper), served by the stomper-api Edge Function.
-  const API = 'https://yzyipxvlsoxfphwobfkb.supabase.co/functions/v1/stomper-api';
-  async function api(params) {
-    const res = await fetch(API + '?' + new URLSearchParams(params), { cache: 'no-cache' });
-    if (!res.ok) throw new Error('stomper-api ' + res.status);
-    return res.json();
-  }
+  const api = (params) => window.StomperApi.get(params);
   const lib = { sort: 'title' };
 
   // ---------------------------------------------------------------- prefs (per song, per device)
@@ -141,6 +137,7 @@
     st.capo = p.capo || 0; st.lyricOffset = p.lyricOffset || 0;
     if (location.hash !== '#v=' + id) history.replaceState(null, '', '#v=' + id);
     showNowTitle();
+    updateFavBtn();
     cue(id);
     try {
       st.song = (await api({ action: 'song', id })).song;
@@ -417,6 +414,7 @@
       openSong(b.dataset.id);
     });
     $('addBtn').addEventListener('click', () => {
+      $('libraryDlg').close();
       $('addInput').value = ''; $('addInput').setCustomValidity('');
       $('addDlg').showModal();
       $('addInput').focus();
@@ -433,6 +431,39 @@
       dlg.addEventListener('click', (e) => {
         if (e.target === dlg || e.target.closest('[data-close]')) dlg.close(); // backdrop or ✕
       });
+    }
+  }
+
+  // ---------------------------------------------------------------- favourites (per connected user)
+  function updateFavBtn() {
+    const on = window.Account.isSignedIn() && !!st.id && favourites.has(st.id);
+    $('favBtn').setAttribute('aria-pressed', String(on));
+    $('favBtn').title = on ? 'Favourite: tap to remove' : 'Favourite';
+  }
+
+  async function loadFavourites() {
+    favourites = new Set();
+    updateFavBtn();
+    if (!window.Account.isSignedIn()) return;
+    try {
+      favourites = new Set((await window.Account.call('listFavourites')).favourites);
+    } catch { /* offline or session gone: no favourites shown */ }
+    updateFavBtn();
+  }
+
+  async function toggleFavourite(btn) {
+    if (!window.Account.isSignedIn()) { window.BriefMessage.show('Log in to use the Favourite function', btn); return; }
+    if (!st.id) return;
+    const id = st.id, on = !favourites.has(id);
+    if (on) favourites.add(id); else favourites.delete(id);
+    updateFavBtn();
+    try {
+      await window.Account.call('setFavourite', { songId: id, on });
+      window.BriefMessage.show(on ? 'Added to favourites' : 'Removed from favourites', btn);
+    } catch (err) {
+      if (on) favourites.delete(id); else favourites.add(id);
+      updateFavBtn();
+      if (err.status !== 401) window.BriefMessage.show(err.message || 'Could not save the favourite', btn);
     }
   }
 
@@ -477,6 +508,8 @@
       seekTo(st.song.beats[i]);
     });
     $('loopBtn').addEventListener('click', (e) => onLoopButton(e.currentTarget));
+    $('favBtn').addEventListener('click', (e) => toggleFavourite(e.currentTarget));
+    window.addEventListener(window.Account.EVENT, loadFavourites);
     const pauseAutoScroll = () => { st.userScrollUntil = performance.now() + 4000; };
     $('grid').addEventListener('touchstart', pauseAutoScroll, { passive: true });
     $('grid').addEventListener('wheel', pauseAutoScroll, { passive: true });
@@ -495,6 +528,7 @@
     try { st.simple = localStorage.getItem('stomper:simple') !== '0'; } catch { /* default on */ }
     strip = new window.ChordStrip($('chordStrip'));
     wire();
+    loadFavourites();
     try { library = (await api({ action: 'list' })).songs; } catch { /* offline with nothing cached */ }
     const fromHash = (location.hash.match(/v=([A-Za-z0-9_-]{11})/) || [])[1];
     const first = fromHash || (library[0] && library[0].id);
