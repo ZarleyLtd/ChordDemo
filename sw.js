@@ -1,4 +1,4 @@
-var CACHE = 'chorddemo-shell-v3';
+var CACHE = 'chorddemo-shell-v4';
 var API_ORIGIN = 'https://yzyipxvlsoxfphwobfkb.supabase.co';
 var SHELL = [
   './',
@@ -8,6 +8,7 @@ var SHELL = [
   './assets/icons/icon.svg',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
+  './assets/icons/jpLogo-white-rotated-2000.png',
   './assets/css/brief-message.css',
   './assets/js/utils/brief-message.js',
   './assets/js/utils/music.js',

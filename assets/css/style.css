@@ -21,7 +21,7 @@ button { font: inherit; color: inherit; }
 /* header */
 .topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--panel); }
 .now-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  color: var(--muted); font-size: 14px; }
+  color: var(--muted); font-size: 14px; text-align: center; }
 .pill, .ctl button, .add button { border: 1px solid var(--line); background: var(--cell); border-radius: 8px;
   padding: 6px 12px; cursor: pointer; }
 .pill.accent, .add button[type="submit"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
@@ -129,3 +129,9 @@ button { font: inherit; color: inherit; }
 .beat.nc { color: var(--muted); font-weight: 400; font-size: 14px; }
 .beat.cont { color: var(--muted); font-weight: 400; }
 .beat.on { background: var(--accent); color: var(--accent-ink); }
+
+/* footer */
+.footer { flex: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom)); background: var(--panel); border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 13px; }
+.footer-logo { display: block; height: 22px; width: auto; }
