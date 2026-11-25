@@ -29,7 +29,7 @@ window.StomperHelpCatalog = {
     },
     'chrome.footer': {
       title: 'Credits',
-      body: 'Who made Stomper.'
+      body: 'Who made Stomper. Tap the JP logo to watch it come apart into a J and a P and fold back together.'
     },
 
     // ------------------------------------------------------------ player
