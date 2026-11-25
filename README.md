@@ -43,6 +43,10 @@ Connect-style accounts (the shared `user-account` pattern): a handle and passwor
   ```
 - **Backend:** tables `stomper.accounts`, `stomper.invites`, `stomper.sessions`, `stomper.favourites`; logic in `supabase/functions/stomper-api/accounts.ts`. Passwords are bcrypt; codes and session tokens are stored only as SHA-256 hashes. Client: `assets/js/components/account.js` (session in `localStorage` keys `stomper:sessionToken` and `stomper:account`, `stomper-session-changed` event on change).
 
+## Contextual help
+
+The shared click-to-target help pattern: tap **?** (in the top bar and in every dialog header), then tap any control, and a popover explains what it does. The tap doesn't run the control. Text lives in `assets/js/utils/help-catalog.js`, keyed by the `data-help` attribute on each control. See [docs/UI_CONTEXTUAL_HELP.md](docs/UI_CONTEXTUAL_HELP.md).
+
 ## Installable app
 
 This uses the Edison-style installable app pattern: `manifest.json`, `sw.js` (network-first, so the cache is only the offline fallback), and icons in `assets/icons/`. Whenever you add a JS or CSS file to the page, add it to `SHELL` in `sw.js` and bump `CACHE` (for example `stomper-shell-v2`).

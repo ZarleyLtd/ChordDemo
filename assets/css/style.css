@@ -1,4 +1,5 @@
 @import url('brief-message.css');
+@import url('contextual-help.css');
 
 :root {
   --bg: #14161a;
@@ -10,6 +11,7 @@
   --accent: #f5a524;
   --accent-ink: #1a1200;
   --downbeat: #4a5060;
+  --header-h: 56px; /* top bar height: the help banner sits just under it */
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -39,12 +41,13 @@ button { font: inherit; color: inherit; }
 .dlg::backdrop { background: rgba(0, 0, 0, .6); }
 .dlg-head { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
 .dlg-head h2 { flex: 1; margin: 0; font-size: 17px; }
-#libraryDlg .dlg-head h2 { flex: none; }
+#libraryDlg .dlg-head h2 { flex: 1 0 100%; text-align: center; } /* title on its own line; buttons below */
 #libraryDlg .dlg-head { flex-wrap: wrap; }
 .dlg-head .lib-fav { width: 34px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; }
 .dlg-head .add-song { width: 34px; height: 32px; padding: 0; margin-right: auto; display: flex; align-items: center;
   justify-content: center; }
-.dlg-close { padding: 6px 10px; }
+.dlg-close, .dlg-head .help-btn { padding: 6px 10px; }
+.dlg-head .help-btn { min-width: 34px; }
 .dlg-input { min-width: 0; padding: 9px; border-radius: 8px; border: 1px solid var(--line);
   background: var(--bg); color: var(--text); font: inherit; }
 #filterInput { margin: 10px 12px 0; }

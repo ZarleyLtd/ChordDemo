@@ -10,10 +10,10 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body data-page="player">
   <div class="app">
     <header class="topbar">
-      <button id="libraryBtn" class="pill icon-btn" type="button" aria-label="Song Library" title="Song Library">
+      <button id="libraryBtn" class="pill icon-btn" data-help="chrome.library" type="button" aria-label="Song Library" title="Song Library">
         <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">
           <defs>
             <linearGradient id="jbTubes" x1="0" y1="0" x2="1" y2="0">
@@ -34,8 +34,10 @@
           <rect x="3" y="21.8" width="18" height="1.7" rx=".85" fill="#5a2412"/>
         </svg>
       </button>
-      <span id="nowTitle" class="now-title"></span>
-      <button id="accountBtn" class="pill icon-btn account-btn" type="button" aria-label="Connect" title="Connect">
+      <span id="nowTitle" class="now-title" data-help="chrome.nowTitle"></span>
+      <button class="pill icon-btn help-btn" type="button" data-help-toggle aria-pressed="false"
+        aria-label="Help: tap, then tap a control" title="Help">?</button>
+      <button id="accountBtn" class="pill icon-btn account-btn" data-help="chrome.account" type="button" aria-label="Connect" title="Connect">
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>
@@ -46,34 +48,36 @@
     <dialog id="libraryDlg" class="dlg" aria-labelledby="libraryHead">
       <div class="dlg-head">
         <h2 id="libraryHead">Song Library</h2>
-        <button id="addBtn" class="pill accent icon-btn add-song" type="button" aria-label="Add New Song" title="Add New Song">
+        <button id="addBtn" class="pill accent icon-btn add-song" data-help="library.add" type="button" aria-label="Add New Song" title="Add New Song">
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor"
             stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         </button>
-        <button id="sortBtn" class="pill" type="button" aria-label="Change sort order">Sort: Title</button>
-        <button id="filterBtn" class="pill toggle" type="button" aria-pressed="false">Filter</button>
-        <button id="favFilterBtn" class="pill toggle icon-btn fav-btn lib-fav" type="button" aria-pressed="false"
+        <button id="sortBtn" class="pill" data-help="library.sort" type="button" aria-label="Change sort order">Sort: Title</button>
+        <button id="filterBtn" class="pill toggle" data-help="library.filter" type="button" aria-pressed="false">Filter</button>
+        <button id="favFilterBtn" class="pill toggle icon-btn fav-btn lib-fav" data-help="library.favsOnly" type="button" aria-pressed="false"
           aria-label="Show favourites only" title="Favourites only">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linejoin="round">
             <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.4 1.1 6.2L12 17l-5.6 3 1.1-6.2-4.6-4.4 6.3-.9z"/>
           </svg>
         </button>
-        <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+        <button class="pill help-btn" type="button" data-help-toggle aria-pressed="false" aria-label="Help: tap, then tap a control" title="Help">?</button>
+        <button class="pill dlg-close" type="button" data-close data-help="chrome.close" aria-label="Close">✕</button>
       </div>
-      <input id="filterInput" class="dlg-input" type="search" placeholder="Type to filter by title or artist" aria-label="Filter songs" autocomplete="off" hidden>
-      <ul id="songList" class="song-list"></ul>
+      <input id="filterInput" class="dlg-input" data-help="library.filterInput" type="search" placeholder="Type to filter by title or artist" aria-label="Filter songs" autocomplete="off" hidden>
+      <ul id="songList" class="song-list" data-help="library.song"></ul>
     </dialog>
 
     <dialog id="addDlg" class="dlg dlg-small" aria-labelledby="addHead">
       <form id="addForm" class="add" method="dialog">
         <div class="dlg-head">
           <h2 id="addHead">Add New Song</h2>
-          <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+          <button class="pill help-btn" type="button" data-help-toggle aria-pressed="false" aria-label="Help: tap, then tap a control" title="Help">?</button>
+          <button class="pill dlg-close" type="button" data-close data-help="chrome.close" aria-label="Close">✕</button>
         </div>
         <div class="add-row">
-          <input id="addInput" class="dlg-input" type="url" inputmode="url" placeholder="Paste YouTube link" aria-label="YouTube link">
-          <button type="submit">Go</button>
+          <input id="addInput" class="dlg-input" data-help="add.link" type="url" inputmode="url" placeholder="Paste YouTube link" aria-label="YouTube link">
+          <button type="submit" data-help="add.go">Go</button>
         </div>
       </form>
     </dialog>
@@ -83,16 +87,17 @@
       <form id="connectForm" class="acct-form">
         <div class="dlg-head">
           <h2 id="connectHead">Connect</h2>
-          <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+          <button class="pill help-btn" type="button" data-help-toggle aria-pressed="false" aria-label="Help: tap, then tap a control" title="Help">?</button>
+          <button class="pill dlg-close" type="button" data-close data-help="chrome.close" aria-label="Close">✕</button>
         </div>
         <div class="dlg-body">
-          <label>Handle <input id="connectHandle" class="dlg-input" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
-          <label>Password <input id="connectPassword" class="dlg-input" type="password" autocomplete="current-password" required></label>
+          <label data-help="connect.handle">Handle <input id="connectHandle" class="dlg-input" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+          <label data-help="connect.password">Password <input id="connectPassword" class="dlg-input" type="password" autocomplete="current-password" required></label>
           <p id="connectMsg" class="acct-msg" hidden></p>
-          <button class="pill accent acct-submit" type="submit">Connect</button>
+          <button class="pill accent acct-submit" type="submit" data-help="connect.submit">Connect</button>
           <p class="acct-links">
-            <button id="toRegister" class="link-btn" type="button">Register with an invite code</button>
-            <button id="toReset" class="link-btn" type="button">Forgot password</button>
+            <button id="toRegister" class="link-btn" data-help="connect.toRegister" type="button">Register with an invite code</button>
+            <button id="toReset" class="link-btn" data-help="connect.toReset" type="button">Forgot password</button>
           </p>
         </div>
       </form>
@@ -102,17 +107,18 @@
       <form id="registerForm" class="acct-form">
         <div class="dlg-head">
           <h2 id="registerHead">Register</h2>
-          <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+          <button class="pill help-btn" type="button" data-help-toggle aria-pressed="false" aria-label="Help: tap, then tap a control" title="Help">?</button>
+          <button class="pill dlg-close" type="button" data-close data-help="chrome.close" aria-label="Close">✕</button>
         </div>
         <div class="dlg-body">
           <p class="acct-note">An admin gives you a one-time invite code. Then choose a handle and password.</p>
-          <label>Invite code <input id="registerCode" class="dlg-input" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required></label>
-          <label>Handle <input id="registerHandle" class="dlg-input" autocomplete="username" autocapitalize="none" spellcheck="false"
+          <label data-help="register.code">Invite code <input id="registerCode" class="dlg-input" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required></label>
+          <label data-help="register.handle">Handle <input id="registerHandle" class="dlg-input" autocomplete="username" autocapitalize="none" spellcheck="false"
             required pattern="[A-Za-z0-9]{3,20}" title="3 to 20 letters or digits, no spaces"></label>
-          <label>Password <input id="registerPassword" class="dlg-input" type="password" autocomplete="new-password" required minlength="8"></label>
-          <label>Confirm password <input id="registerPassword2" class="dlg-input" type="password" autocomplete="new-password" required minlength="8"></label>
+          <label data-help="register.password">Password <input id="registerPassword" class="dlg-input" type="password" autocomplete="new-password" required minlength="8"></label>
+          <label data-help="register.password">Confirm password <input id="registerPassword2" class="dlg-input" type="password" autocomplete="new-password" required minlength="8"></label>
           <p id="registerMsg" class="acct-msg" hidden></p>
-          <button class="pill accent acct-submit" type="submit">Register</button>
+          <button class="pill accent acct-submit" type="submit" data-help="register.submit">Register</button>
         </div>
       </form>
     </dialog>
@@ -121,15 +127,16 @@
       <form id="resetForm" class="acct-form">
         <div class="dlg-head">
           <h2 id="resetHead">Reset password</h2>
-          <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+          <button class="pill help-btn" type="button" data-help-toggle aria-pressed="false" aria-label="Help: tap, then tap a control" title="Help">?</button>
+          <button class="pill dlg-close" type="button" data-close data-help="chrome.close" aria-label="Close">✕</button>
         </div>
         <div class="dlg-body">
           <p class="acct-note">Ask an admin for a one-time reset code, then choose a new password.</p>
-          <label>Handle <input id="resetHandle" class="dlg-input" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
-          <label>Reset code <input id="resetCode" class="dlg-input" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required></label>
-          <label>New password <input id="resetPassword" class="dlg-input" type="password" autocomplete="new-password" required minlength="8"></label>
+          <label data-help="reset.handle">Handle <input id="resetHandle" class="dlg-input" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+          <label data-help="reset.code">Reset code <input id="resetCode" class="dlg-input" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required></label>
+          <label data-help="reset.password">New password <input id="resetPassword" class="dlg-input" type="password" autocomplete="new-password" required minlength="8"></label>
           <p id="resetMsg" class="acct-msg" hidden></p>
-          <button class="pill accent acct-submit" type="submit">Update password</button>
+          <button class="pill accent acct-submit" type="submit" data-help="reset.submit">Update password</button>
         </div>
       </form>
     </dialog>
@@ -137,75 +144,76 @@
     <dialog id="accountDlg" class="dlg" aria-labelledby="accountHead">
       <div class="dlg-head">
         <h2 id="accountHead">Account</h2>
-        <button class="pill dlg-close" type="button" data-close aria-label="Close">✕</button>
+        <button class="pill help-btn" type="button" data-help-toggle aria-pressed="false" aria-label="Help: tap, then tap a control" title="Help">?</button>
+          <button class="pill dlg-close" type="button" data-close data-help="chrome.close" aria-label="Close">✕</button>
       </div>
       <div class="dlg-body">
-        <div class="acct-who">
+        <div class="acct-who" data-help="account.who">
           <span id="accountHandle" class="acct-handle"></span>
           <span id="accountType" class="acct-badge"></span>
         </div>
         <div class="acct-actions">
-          <button id="switchBtn" class="pill" type="button">Switch account</button>
-          <button id="signOutBtn" class="pill" type="button">Sign out</button>
+          <button id="switchBtn" class="pill" data-help="account.switch" type="button">Switch account</button>
+          <button id="signOutBtn" class="pill" data-help="account.signOut" type="button">Sign out</button>
         </div>
 
         <div id="adminPanel" hidden>
           <h3 class="acct-section">Invite a new user</h3>
           <form id="inviteForm" class="invite-form">
-            <input id="inviteLabel" class="dlg-input" maxlength="80" placeholder="Who it's for (optional)" aria-label="Who the invite is for">
-            <select id="inviteType" class="dlg-input" aria-label="Account type">
+            <input id="inviteLabel" class="dlg-input" data-help="admin.inviteLabel" maxlength="80" placeholder="Who it's for (optional)" aria-label="Who the invite is for">
+            <select id="inviteType" class="dlg-input" data-help="admin.inviteType" aria-label="Account type">
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
-            <button class="pill accent" type="submit">Issue code</button>
+            <button class="pill accent" type="submit" data-help="admin.issue">Issue code</button>
           </form>
-          <div id="issuedCode" class="issued" hidden>
+          <div id="issuedCode" class="issued" data-help="admin.issued" hidden>
             <span id="issuedWhat" class="issued-what"></span>
             <div class="issued-row">
               <code id="issuedValue" class="issued-code"></code>
-              <button id="issuedCopy" class="pill" type="button">Copy</button>
+              <button id="issuedCopy" class="pill" data-help="admin.issuedCopy" type="button">Copy</button>
             </div>
           </div>
 
           <h3 class="acct-section">Unused codes</h3>
-          <ul id="inviteList" class="acct-list"></ul>
+          <ul id="inviteList" class="acct-list" data-help="admin.invites"></ul>
 
           <h3 class="acct-section">Users</h3>
-          <ul id="userList" class="acct-list"></ul>
+          <ul id="userList" class="acct-list" data-help="admin.users"></ul>
         </div>
       </div>
     </dialog>
 
     <div class="stage">
-      <div class="video"><div id="player"></div></div>
-      <div id="adNote" class="ad-note" hidden>Ad playing: chords and lyrics start when the song does</div>
+      <div class="video" data-help="player.video"><div id="player"></div></div>
+      <div id="adNote" class="ad-note" data-help="player.adNote" hidden>Ad playing: chords and lyrics start when the song does</div>
 
-      <div id="chordStrip" class="strip" role="button" tabindex="0" aria-label="Chords: tap to pause or play">
+      <div id="chordStrip" class="strip" data-help="player.strip" role="button" tabindex="0" aria-label="Chords: tap to pause or play">
         <div id="stripPlay" class="strip-play" hidden aria-hidden="true">
           <svg viewBox="0 0 24 24" width="28" height="28"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
         </div>
       </div>
 
       <div class="lyrics-row">
-        <button id="offDown" class="ly-adj" type="button" aria-label="Lyrics earlier">−</button>
-        <div class="lyrics" aria-live="off">
+        <button id="offDown" class="ly-adj" data-help="player.lyricsEarlier" type="button" aria-label="Lyrics earlier">−</button>
+        <div class="lyrics" aria-live="off" data-help="player.lyrics">
           <div id="lyPrev" class="ly prev"></div>
           <div id="lyNow" class="ly cur"></div>
           <div id="lyNext" class="ly nxt"></div>
         </div>
-        <button id="offUp" class="ly-adj" type="button" aria-label="Lyrics later">+</button>
+        <button id="offUp" class="ly-adj" data-help="player.lyricsLater" type="button" aria-label="Lyrics later">+</button>
       </div>
 
       <div class="controls">
-        <div class="ctl">
+        <div class="ctl" data-help="player.capo">
           <span class="label">Capo</span>
-          <button id="capoDown" aria-label="Capo down">−</button>
+          <button id="capoDown" data-help="player.capoDown" aria-label="Capo down">−</button>
           <span id="capoVal" class="val">none</span>
-          <button id="capoUp" aria-label="Capo up">+</button>
-          <button id="bestBtn" class="pill best-btn" type="button" aria-label="Suggested capo" title="Suggested capo">0</button>
+          <button id="capoUp" data-help="player.capoUp" aria-label="Capo up">+</button>
+          <button id="bestBtn" class="pill best-btn" data-help="player.bestCapo" type="button" aria-label="Suggested capo" title="Suggested capo">0</button>
         </div>
         <div class="ctl ctl-end">
-          <button id="loopBtn" class="pill toggle icon-btn" type="button" aria-pressed="false"
+          <button id="loopBtn" class="pill toggle icon-btn" data-help="player.loop" type="button" aria-pressed="false"
             aria-label="Loop: tap two beats to repeat between them" title="Loop">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -213,7 +221,7 @@
               <path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>
             </svg>
           </button>
-          <button id="simpleBtn" class="pill toggle icon-btn" type="button" aria-pressed="true"
+          <button id="simpleBtn" class="pill toggle icon-btn" data-help="player.simplify" type="button" aria-pressed="true"
             aria-label="Simplify chords" title="Simplify chords">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -221,7 +229,7 @@
               <path d="M15 14l3 3 3-3"/><path d="M18 11v6"/><path d="M14 20h8"/>
             </svg>
           </button>
-          <button id="favBtn" class="pill toggle icon-btn fav-btn" type="button" aria-pressed="false"
+          <button id="favBtn" class="pill toggle icon-btn fav-btn" data-help="player.favourite" type="button" aria-pressed="false"
             aria-label="Favourite" title="Favourite">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linejoin="round">
@@ -230,27 +238,29 @@
           </button>
         </div>
       </div>
-      <div id="meta" class="meta"></div>
+      <div id="meta" class="meta" data-help="player.meta"></div>
     </div>
 
-    <div id="notAnalysed" class="notice" hidden>
+    <div id="notAnalysed" class="notice" data-help="player.notAnalysed" hidden>
       <p>This song hasn't been analysed yet. You can play it with lyrics now. To get chords and beats, run this on your PC, then reload:</p>
-      <p><code id="cmd"></code> <button id="copyBtn" class="pill">Copy</button></p>
+      <p><code id="cmd"></code> <button id="copyBtn" class="pill" type="button" data-help="player.copyCmd">Copy</button></p>
     </div>
 
-    <main id="grid" class="grid" aria-label="Chords on the beat"></main>
+    <main id="grid" class="grid" data-help="player.grid" aria-label="Chords on the beat"></main>
 
-    <footer class="footer">
+    <footer class="footer" data-help="chrome.footer">
       Created by <img src="assets/icons/jpLogo-white-rotated-2000.png" alt="JP" class="footer-logo">
     </footer>
   </div>
 
   <script src="assets/js/config/api.js"></script>
   <script src="assets/js/utils/brief-message.js"></script>
+  <script src="assets/js/utils/help-catalog.js"></script>
   <script src="assets/js/utils/music.js"></script>
   <script src="assets/js/utils/lyrics.js"></script>
   <script src="assets/js/components/chord-diagram.js"></script>
   <script src="assets/js/components/chord-strip.js"></script>
+  <script src="assets/js/components/contextual-help.js"></script>
   <script src="assets/js/components/account.js"></script>
   <script src="assets/js/pages/player.js"></script>
   <script src="main.js"></script>

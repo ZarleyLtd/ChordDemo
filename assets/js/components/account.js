@@ -216,11 +216,11 @@ window.Account = (function () {
         <span class="acct-row-main"><b>${esc(a.handle)}</b>${self ? ' <span class="muted">(you)</span>' : ''}
           ${a.disabled ? ' <span class="muted">· disabled</span>' : ''}
           <span class="acct-row-sub">${esc(seen)}</span></span>
-        <select class="dlg-input type-select" aria-label="Account type for ${esc(a.handle)}" ${self ? 'disabled title="You can\'t change your own type"' : ''}>
+        <select class="dlg-input type-select" data-help="admin.userType" aria-label="Account type for ${esc(a.handle)}" ${self ? 'disabled title="You can\'t change your own type"' : ''}>
           <option value="user"${a.isAdmin ? '' : ' selected'}>User</option>
           <option value="admin"${a.isAdmin ? ' selected' : ''}>Admin</option>
         </select>
-        <button class="pill reset-code" type="button">Reset code</button>
+        <button class="pill reset-code" type="button" data-help="admin.resetCode">Reset code</button>
       </li>`;
     }).join('') || '<li class="empty">No users yet</li>';
   }
@@ -232,7 +232,7 @@ window.Account = (function () {
         : `${i.isAdmin ? 'Admin' : 'User'} invite${i.label ? ' for <b>' + esc(i.label) + '</b>' : ''}`;
       return `<li class="acct-row" data-invite="${esc(i.id)}">
         <span class="acct-row-main">${what}<span class="acct-row-sub">expires ${esc(fmtWhen(i.expiresAt))}</span></span>
-        <button class="pill revoke" type="button">Revoke</button>
+        <button class="pill revoke" type="button" data-help="admin.revoke">Revoke</button>
       </li>`;
     }).join('') || '<li class="empty">No unused codes</li>';
   }

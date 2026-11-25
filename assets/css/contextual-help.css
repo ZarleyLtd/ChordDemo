@@ -1,0 +1,98 @@
+/**
+ * Contextual help: help-mode hint and anchored popover.
+ * Copied from FamilyTree; colours use Stomper's variables. The banner and popover mount inside the
+ * topmost open modal <dialog> when there is one (see contextual-help.js), so they stay visible.
+ */
+body.help-mode,
+body.help-mode * {
+  cursor: help !important;
+}
+
+/* The YouTube iframe swallows taps before the page sees them: cover it in help mode so a tap on
+   the video reaches .video's data-help. */
+body.help-mode .video::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.help-hint {
+  position: fixed;
+  top: var(--header-h, 56px);
+  left: 0;
+  right: 0;
+  z-index: 45;
+  padding: 0.35rem 0.9rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Inside a dialog the page header is under the backdrop: pin the banner to the top edge. */
+dialog .help-hint {
+  top: 0;
+}
+
+.help-btn {
+  font-weight: 700;
+}
+
+[data-help-toggle][aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.help-popover {
+  position: fixed;
+  z-index: 120;
+  width: min(22rem, calc(100vw - 1.2rem));
+  max-height: min(70vh, 24rem);
+  overflow: auto;
+  margin: 0;
+  padding: 0.85rem 1rem 1rem;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+  text-align: left;
+}
+
+.help-popover__close {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.help-popover__close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.help-popover h3 {
+  margin: 0 2rem 0.4rem 0;
+  font-size: 1rem;
+  color: var(--text);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.help-popover p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
