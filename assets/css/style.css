@@ -40,6 +40,8 @@ button { font: inherit; color: inherit; }
 .dlg-head { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
 .dlg-head h2 { flex: 1; margin: 0; font-size: 17px; }
 #libraryDlg .dlg-head h2 { flex: none; }
+#libraryDlg .dlg-head { flex-wrap: wrap; }
+.dlg-head .lib-fav { width: 34px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; }
 .dlg-head .add-song { width: 34px; height: 32px; padding: 0; margin-right: auto; display: flex; align-items: center;
   justify-content: center; }
 .dlg-close { padding: 6px 10px; }
@@ -114,6 +116,8 @@ button { font: inherit; color: inherit; }
 .ctl button { padding: 4px 10px; min-width: 34px; }
 .val { min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; }
 .pill:disabled { opacity: .45; cursor: default; }
+.ctl .best-btn { min-width: 34px; padding: 4px 10px; background: #2e9d4f; border-color: #2e9d4f; color: #fff;
+  font-weight: 700; font-variant-numeric: tabular-nums; }
 .toggle[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .fav-btn[aria-pressed="true"] svg { fill: currentColor; }
 .meta { padding: 0 16px 6px; font-size: 12px; color: var(--muted); }

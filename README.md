@@ -35,7 +35,7 @@ Connect-style accounts (the shared `user-account` pattern): a handle and passwor
   - **Invite a new user:** issue a one-time invite code (valid 30 days) for a User or Admin account.
   - **Users:** change any other account between User and Admin (not your own, so there is always an admin), and issue a one-time **Reset code** (valid 24 hours) for a forgotten password.
   - **Unused codes:** pending invite and reset codes, with Revoke.
-- **Favourites:** the star button (right of Simplify chords) marks the current song as a favourite for the connected user (`stomper.favourites`). Guests get a brief "Log in to use the Favourite function".
+- **Favourites:** the star button (right of Simplify chords) marks the current song as a favourite for the connected user (`stomper.favourites`). The star in the Song Library header shows favourites only. Guests get a brief "Log in to use the Favourite function" from either star.
 - **Register:** Connect → "Register with an invite code" → code, handle (3–20 letters or digits), password.
 - **First admin:** issue an admin invite from the PC with the write key, then register with it in the app:
   ```

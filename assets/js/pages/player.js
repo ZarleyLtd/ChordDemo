@@ -15,7 +15,7 @@
   let favourites = new Set(); // video ids the connected user has marked as favourite
   // Song library lives in Supabase (schema stomper), served by the stomper-api Edge Function.
   const api = (params) => window.StomperApi.get(params);
-  const lib = { sort: 'title' };
+  const lib = { sort: 'title', favsOnly: false };
 
   // ---------------------------------------------------------------- prefs (per song, per device)
   const prefKey = (id) => 'stomper:' + id;
@@ -178,7 +178,11 @@
     }
     $('simpleBtn').setAttribute('aria-pressed', st.simple);
     const best = window.Music.bestCapo(chords, st.simple);
-    $('bestBtn').textContent = 'Best: ' + (best.capo === 0 ? 'no capo' : best.capo);
+    // Suggested capo: just the fret number in a green button (0 = no capo).
+    const bestLabel = 'Suggested capo: ' + (best.capo === 0 ? 'none' : 'fret ' + best.capo);
+    $('bestBtn').textContent = String(best.capo);
+    $('bestBtn').setAttribute('aria-label', bestLabel + (best.capo === st.capo ? '' : ' (tap to use)'));
+    $('bestBtn').title = bestLabel;
     $('bestBtn').disabled = !st.song || best.capo === st.capo;
     renderGrid();
     markLoop();
@@ -357,7 +361,10 @@
     const by = lib.sort, other = by === 'title' ? 'artist' : 'title';
     $('sortBtn').textContent = 'Sort: ' + (by === 'title' ? 'Title' : 'Artist');
     const q = $('filterInput').hidden ? '' : $('filterInput').value.trim().toLowerCase();
+    const favsOnly = lib.favsOnly && window.Account.isSignedIn();
+    $('favFilterBtn').setAttribute('aria-pressed', String(favsOnly));
     const rows = library
+      .filter((s) => !favsOnly || favourites.has(s.id))
       .filter((s) => !q || s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q))
       .sort((a, b) => a[by].localeCompare(b[by], undefined, { sensitivity: 'base' })
         || a[other].localeCompare(b[other], undefined, { sensitivity: 'base' }));
@@ -377,7 +384,8 @@
         + `<span class="main">${esc(s.title)}</span><span class="sub">${esc(s.artist)}</span></button></li>`).join('');
     }
     $('songList').innerHTML = rows.length
-      ? html : `<li class="empty">${library.length ? 'No songs match' : 'No songs yet'}</li>`;
+      ? html : `<li class="empty">${!library.length ? 'No songs yet'
+        : favsOnly && !q ? 'No favourites yet' : 'No songs match'}</li>`;
   }
 
   function openLibrary() {
@@ -385,6 +393,7 @@
     $('filterInput').value = '';
     $('filterInput').hidden = true;
     $('filterBtn').setAttribute('aria-pressed', 'false');
+    lib.favsOnly = false;
     renderLibrary();
     $('libraryDlg').showModal();
     const cur = $('songList').querySelector('.current');
@@ -407,6 +416,17 @@
       renderLibrary();
     });
     $('filterInput').addEventListener('input', renderLibrary);
+    $('favFilterBtn').addEventListener('click', (e) => {
+      if (!window.Account.isSignedIn()) {
+        window.BriefMessage.show('Log in to use the Favourite function', e.currentTarget);
+        // The shared helper appends to <body>, under the modal's top layer: move it into the dialog.
+        const msgs = document.body.querySelectorAll(':scope > .brief-message');
+        if (msgs.length) $('libraryDlg').appendChild(msgs[msgs.length - 1]);
+        return;
+      }
+      lib.favsOnly = !lib.favsOnly;
+      renderLibrary();
+    });
     $('songList').addEventListener('click', (e) => {
       const b = e.target.closest('button[data-id]');
       if (!b) return;
