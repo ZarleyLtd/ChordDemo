@@ -12,17 +12,17 @@
   let player = null, playerReady = false, pendingId = null, strip = null;
   let clockBase = { t: 0, at: 0 }, lastRaw = -1, shown = 0;
   let library = [];
-  // Song library lives in Supabase (schema chorddemo), served by the chorddemo-api Edge Function.
-  const API = 'https://yzyipxvlsoxfphwobfkb.supabase.co/functions/v1/chorddemo-api';
+  // Song library lives in Supabase (schema stomper), served by the stomper-api Edge Function.
+  const API = 'https://yzyipxvlsoxfphwobfkb.supabase.co/functions/v1/stomper-api';
   async function api(params) {
     const res = await fetch(API + '?' + new URLSearchParams(params), { cache: 'no-cache' });
-    if (!res.ok) throw new Error('chorddemo-api ' + res.status);
+    if (!res.ok) throw new Error('stomper-api ' + res.status);
     return res.json();
   }
   const lib = { sort: 'title' };
 
   // ---------------------------------------------------------------- prefs (per song, per device)
-  const prefKey = (id) => 'chorddemo:' + id;
+  const prefKey = (id) => 'stomper:' + id;
   function loadPrefs(id) {
     try { return JSON.parse(localStorage.getItem(prefKey(id))) || {}; } catch { return {}; }
   }
@@ -30,7 +30,7 @@
     if (!st.id) return;
     try {
       localStorage.setItem(prefKey(st.id), JSON.stringify({ capo: st.capo, lyricOffset: st.lyricOffset }));
-      localStorage.setItem('chorddemo:simple', st.simple ? '1' : '0');
+      localStorage.setItem('stomper:simple', st.simple ? '1' : '0');
     } catch { /* storage unavailable: settings just won't persist */ }
   }
 
@@ -395,11 +395,11 @@
   }
 
   function wireDialogs() {
-    try { if (localStorage.getItem('chorddemo:sort') === 'artist') lib.sort = 'artist'; } catch { /* default title */ }
+    try { if (localStorage.getItem('stomper:sort') === 'artist') lib.sort = 'artist'; } catch { /* default title */ }
     $('libraryBtn').addEventListener('click', openLibrary);
     $('sortBtn').addEventListener('click', () => {
       lib.sort = lib.sort === 'title' ? 'artist' : 'title';
-      try { localStorage.setItem('chorddemo:sort', lib.sort); } catch { /* not persisted */ }
+      try { localStorage.setItem('stomper:sort', lib.sort); } catch { /* not persisted */ }
       renderLibrary();
     });
     $('filterBtn').addEventListener('click', () => {
@@ -492,7 +492,7 @@
   }
 
   async function init() {
-    try { st.simple = localStorage.getItem('chorddemo:simple') !== '0'; } catch { /* default on */ }
+    try { st.simple = localStorage.getItem('stomper:simple') !== '0'; } catch { /* default on */ }
     strip = new window.ChordStrip($('chordStrip'));
     wire();
     try { library = (await api({ action: 'list' })).songs; } catch { /* offline with nothing cached */ }
@@ -503,8 +503,8 @@
   }
 
   window.PlayerPage = { init };
-  // Console/debug helper: ChordDemoDebug()
-  window.ChordDemoDebug = () => playerReady && ({
+  // Console/debug helper: StomperDebug()
+  window.StomperDebug = () => playerReady && ({
     state: player.getPlayerState(), time: player.getCurrentTime(), duration: player.getDuration(),
     video: player.getVideoData() || {}, songDuration: st.song && st.song.duration, pendingSeek: st.pendingSeek,
   });

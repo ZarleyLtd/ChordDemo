@@ -1,8 +1,8 @@
 # Adding and managing songs
 
-Songs live in Supabase (the `chorddemo.songs` table on the shared Apps project). Adding a song only adds data: there's no commit or push. Reload the app afterwards and the song appears in the Song Library.
+Songs live in Supabase (the `stomper.songs` table on the shared Apps project). Adding a song only adds data: there's no commit or push. Reload the app afterwards and the song appears in the Song Library.
 
-Run every command below from the `ChordDemo` folder on the PC where the analyser is set up. See "First-time analyser setup" in the [README](../README.md).
+Run every command below from the `Stomper` folder on the PC where the analyser is set up. See "First-time analyser setup" in the [README](../README.md).
 
 ## Add one song
 
@@ -28,10 +28,10 @@ The `<id>` used in the commands below is the 11-character code at the end of the
 ## Fix, remove or list songs
 
 ```
-analyzer\.venv\Scripts\python.exe analyzer\chorddemo_api.py list
-analyzer\.venv\Scripts\python.exe analyzer\chorddemo_api.py rename <id> --title "…" --artist "…"
-analyzer\.venv\Scripts\python.exe analyzer\chorddemo_api.py delete <id>
-analyzer\.venv\Scripts\python.exe analyzer\chorddemo_api.py import <song.json> [...]
+analyzer\.venv\Scripts\python.exe analyzer\stomper_api.py list
+analyzer\.venv\Scripts\python.exe analyzer\stomper_api.py rename <id> --title "…" --artist "…"
+analyzer\.venv\Scripts\python.exe analyzer\stomper_api.py delete <id>
+analyzer\.venv\Scripts\python.exe analyzer\stomper_api.py import <song.json> [...]
 ```
 
 - **rename** changes the name shown in the library and used for the lyrics lookup. Give either or both options.
@@ -67,13 +67,13 @@ The run can be resumed: songs already in the log are skipped. **To retry failure
 `analyzer\.env` (git-ignored) holds:
 
 ```
-CHORDDEMO_API=https://yzyipxvlsoxfphwobfkb.supabase.co/functions/v1/chorddemo-api
-CHORDDEMO_WRITE_KEY=…
+STOMPER_API=https://yzyipxvlsoxfphwobfkb.supabase.co/functions/v1/stomper-api
+STOMPER_WRITE_KEY=…
 ```
 
-The key must match the `CHORDDEMO_WRITE_KEY` secret on the `chorddemo-api` Edge Function, which rejects writes without it. To run the analyser on another PC, copy this file there. Never commit it, because the repo is public.
+The key must match the `STOMPER_WRITE_KEY` secret on the `stomper-api` Edge Function, which rejects writes without it. To run the analyser on another PC, copy this file there. Never commit it, because the repo is public.
 
-To change the key, generate a new one, put it in `analyzer\.env`, then run `supabase secrets set --env-file analyzer\.env` from the `ChordDemo` folder.
+To change the key, generate a new one, put it in `analyzer\.env`, then run `supabase secrets set --env-file analyzer\.env` from the `Stomper` folder.
 
 ## Troubleshooting
 
@@ -81,7 +81,7 @@ To change the key, generate a new one, put it in `analyzer\.env`, then run `supa
 |---|---|
 | `HTTP Error 403: Forbidden` while downloading | YouTube is refusing downloads for a while. Wait and retry. Updating yt-dlp often helps: `analyzer\.venv\Scripts\pip install -U "yt-dlp[default]"`. |
 | `Failed to resolve …googlevideo.com` | A network blip. Retry. |
-| `chorddemo-api save: 403 Not allowed` | `analyzer\.env` is missing, or its key doesn't match the function secret. |
+| `stomper-api save: 403 Not allowed` | `analyzer\.env` is missing, or its key doesn't match the function secret. |
 | The song is saved but won't play in the app | The video doesn't allow embedding. Delete the song and use another upload. |
 | Lyrics show "No synced lyrics found" | LRCLIB has no synced lyrics under that artist and title. Try `rename` with the official names. |
 | Chords drift out of time | The video is a different recording (live, remaster, or a different edit). Replace it. |

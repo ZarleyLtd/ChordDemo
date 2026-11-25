@@ -1,16 +1,16 @@
 /**
- * ChordDemo API — Supabase Edge Function (shared "Apps" project, schema `chorddemo`).
+ * Stomper API — Supabase Edge Function (shared "Apps" project, schema `stomper`).
  *
  * Public reads (the web app):
  *   GET  ?action=list            -> { songs: [{ id, title, artist }] }
  *   GET  ?action=song&id=<vid>   -> { song: { id, title, artist, duration, bpm, beats, downbeats, chords, bass, ... } }
- * Writes (the analyser on the home PC), need the CHORDDEMO_WRITE_KEY secret:
+ * Writes (the analyser on the home PC), need the STOMPER_WRITE_KEY secret:
  *   POST { action: "save",   key, song }
  *   POST { action: "update", key, id, title?, artist? }
  *   POST { action: "delete", key, id }
  *
- * Secrets: SUPABASE_DB_URL (provided by Supabase), CHORDDEMO_WRITE_KEY.
- * Deploy:  supabase functions deploy chorddemo-api --no-verify-jwt
+ * Secrets: SUPABASE_DB_URL (provided by Supabase), STOMPER_WRITE_KEY.
+ * Deploy:  supabase functions deploy stomper-api --no-verify-jwt
  */
 import postgres from "https://deno.land/x/postgresjs@v3.4.4/mod.js";
 
@@ -38,7 +38,7 @@ function db() {
 }
 
 function requireKey(key: unknown) {
-  const want = Deno.env.get("CHORDDEMO_WRITE_KEY") ?? "";
+  const want = Deno.env.get("STOMPER_WRITE_KEY") ?? "";
   if (!want || key !== want) throw Object.assign(new Error("Not allowed"), { status: 403 });
 }
 
@@ -48,12 +48,12 @@ function requireId(id: unknown): string {
 }
 
 async function list() {
-  const rows = await db()`select id, title, artist from chorddemo.songs order by lower(artist), lower(title)`;
+  const rows = await db()`select id, title, artist from stomper.songs order by lower(artist), lower(title)`;
   return { songs: rows };
 }
 
 async function song(id: string) {
-  const [r] = await db()`select id, title, artist, duration, bpm, data, analysed_at from chorddemo.songs where id = ${id}`;
+  const [r] = await db()`select id, title, artist, duration, bpm, data, analysed_at from stomper.songs where id = ${id}`;
   if (!r) throw Object.assign(new Error("Song not found"), { status: 404 });
   return {
     song: {
@@ -74,7 +74,7 @@ async function save(s: Record<string, unknown>) {
   const when = new Date(String(analysedAt ?? ""));
   const analysed = isNaN(when.getTime()) ? new Date() : when;
   await db()`
-    insert into chorddemo.songs (id, title, artist, duration, bpm, data, analysed_at, updated_at)
+    insert into stomper.songs (id, title, artist, duration, bpm, data, analysed_at, updated_at)
     values (${id}, ${title}, ${artist}, ${(duration ?? null) as number | null}, ${(bpm ?? null) as number | null},
             ${db().json(data as never)}, ${analysed}, now())
     on conflict (id) do update set title = excluded.title, artist = excluded.artist, duration = excluded.duration,
@@ -87,7 +87,7 @@ async function update(b: Record<string, unknown>) {
   const title = b.title == null ? null : String(b.title).trim();
   const artist = b.artist == null ? null : String(b.artist).trim();
   const rows = await db()`
-    update chorddemo.songs set title = coalesce(nullif(${title}, ''), title),
+    update stomper.songs set title = coalesce(nullif(${title}, ''), title),
       artist = coalesce(nullif(${artist}, ''), artist), updated_at = now()
     where id = ${id} returning id`;
   if (!rows.length) throw Object.assign(new Error("Song not found"), { status: 404 });
@@ -95,7 +95,7 @@ async function update(b: Record<string, unknown>) {
 }
 
 async function remove(id: string) {
-  await db()`delete from chorddemo.songs where id = ${id}`;
+  await db()`delete from stomper.songs where id = ${id}`;
   return { ok: true, id };
 }
 

@@ -1,4 +1,4 @@
-var CACHE = 'chorddemo-shell-v4';
+var CACHE = 'stomper-shell-v1';
 var API_ORIGIN = 'https://yzyipxvlsoxfphwobfkb.supabase.co';
 var SHELL = [
   './',
@@ -40,7 +40,7 @@ self.addEventListener('activate', function (event) {
 self.addEventListener('fetch', function (event) {
   var url = new URL(event.request.url);
   if (event.request.method !== 'GET') return;
-  var isApi = url.origin === API_ORIGIN && url.pathname.indexOf('/functions/v1/chorddemo-api') === 0;
+  var isApi = url.origin === API_ORIGIN && url.pathname.indexOf('/functions/v1/stomper-api') === 0;
   if (url.origin !== self.location.origin && !isApi) return;
   event.respondWith(fetch(event.request).then(function (response) {
     if (response.ok) {

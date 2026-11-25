@@ -1,4 +1,4 @@
-# ChordDemo
+# Stomper
 
 A bare-bones Chordify-style demo: a YouTube player, chords on a beat grid, synced lyrics, and a capo setting.
 
@@ -10,35 +10,35 @@ A bare-bones Chordify-style demo: a YouTube player, chords on a beat grid, synce
   - **BTC** (ISMIR 2019, large vocabulary) for chords, snapped to beats
 
   It then saves the song to the library and deletes the audio. Lyrics are **not** stored. The page fetches synced lyrics live from **LRCLIB**.
-- **Song library** (Supabase): songs live in the `chorddemo.songs` table on the shared CursorSites **Apps** project. The page reads them through the `chorddemo-api` Edge Function (`?action=list`, `?action=song&id=`), and the analyser writes through the same function with a write key. Adding a song is just adding data: no commit or push.
+- **Song library** (Supabase): songs live in the `stomper.songs` table on the shared CursorSites **Apps** project. The page reads them through the `stomper-api` Edge Function (`?action=list`, `?action=song&id=`), and the analyser writes through the same function with a write key. Adding a song is just adding data: no commit or push.
 - Songs that haven't been analysed still play, with lyrics only. The page looks the lyrics up on LRCLIB from the video title.
 
 ## Use it
 
-- **Live site:** https://zarleyltd.github.io/ChordDemo/ (GitHub Pages from `main`).
+- **Live site:** https://zarleyltd.github.io/Stomper/ (GitHub Pages from `main`).
 - **Add a song (on the PC):**
   ```
   analyzer\analyze.bat https://www.youtube.com/watch?v=XXXXXXXXXXX
   ```
   This analyses the song and saves it to the library. Reload the app to see it. Add `--title "…" --artist "…"` to override what YouTube reports, or `--file` to write `songs/<id>.json` locally instead (for testing).
-- **Fix or remove a song:** `analyzer\.venv\Scripts\python.exe analyzer\chorddemo_api.py rename <id> --title "…" --artist "…"`, `… delete <id>`, or `… list`.
+- **Fix or remove a song:** `analyzer\.venv\Scripts\python.exe analyzer\stomper_api.py rename <id> --title "…" --artist "…"`, `… delete <id>`, or `… list`.
 - **Add a list of songs:** `analyzer\.venv\Scripts\python.exe analyzer\batch_add.py analyzer\batch\<list>.tsv`. Full guide, options and troubleshooting: [docs/ADDING_SONGS.md](docs/ADDING_SONGS.md).
-- **Write key:** `analyzer/.env` (git-ignored) holds `CHORDDEMO_API` and `CHORDDEMO_WRITE_KEY`. The same key is the `CHORDDEMO_WRITE_KEY` secret on the Edge Function. Copy this file to any other PC that runs the analyser.
+- **Write key:** `analyzer/.env` (git-ignored) holds `STOMPER_API` and `STOMPER_WRITE_KEY`. The same key is the `STOMPER_WRITE_KEY` secret on the Edge Function. Copy this file to any other PC that runs the analyser.
 - **Local testing:** run `start-demo.bat`, then open http://localhost:3000. Open it in a real browser, not an editor preview, or YouTube refuses to play.
 
 ## Installable app
 
-This uses the Edison-style installable app pattern: `manifest.json`, `sw.js` (network-first, so the cache is only the offline fallback), and icons in `assets/icons/`. Whenever you add a JS or CSS file to the page, add it to `SHELL` in `sw.js` and bump `CACHE` (for example `chorddemo-shell-v2`).
+This uses the Edison-style installable app pattern: `manifest.json`, `sw.js` (network-first, so the cache is only the offline fallback), and icons in `assets/icons/`. Whenever you add a JS or CSS file to the page, add it to `SHELL` in `sw.js` and bump `CACHE` (for example `stomper-shell-v2`).
 
 ## Backend (Supabase)
 
 - Schema migration: `supabase/migrations/`. Apply new ones with the shared-supabase process (never `supabase db push`).
-- Edge Function: `supabase/functions/chorddemo-api/`. Deploy with `supabase functions deploy chorddemo-api --no-verify-jwt`.
+- Edge Function: `supabase/functions/stomper-api/`. Deploy with `supabase functions deploy stomper-api --no-verify-jwt`.
 - The schema isn't exposed to PostgREST; only the Edge Function reads and writes it.
 
 ## YouTube ads
 
-During an ad, the IFrame player reports `UNSTARTED` (-1) while `getCurrentTime()` runs on the ad's clock. The page treats that as "ad playing": it freezes the chords and lyrics, and it keeps any tapped seek until the song starts. Ads in the middle of a song haven't been tested yet. `ChordDemoDebug()` in the browser console shows the player state.
+During an ad, the IFrame player reports `UNSTARTED` (-1) while `getCurrentTime()` runs on the ad's clock. The page treats that as "ad playing": it freezes the chords and lyrics, and it keeps any tapped seek until the song starts. Ads in the middle of a song haven't been tested yet. `StomperDebug()` in the browser console shows the player state.
 
 ## First-time analyser setup
 

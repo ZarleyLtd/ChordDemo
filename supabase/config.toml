@@ -1,8 +1,8 @@
-# ChordDemo on the shared CursorSites "Apps" project (yzyipxvlsoxfphwobfkb), schema `chorddemo`.
+# Stomper on the shared CursorSites "Apps" project (yzyipxvlsoxfphwobfkb), schema `stomper`.
 # Never run `supabase db push` here: apply migrations with apply_migration / SQL editor (see shared-supabase skill).
-# Edge Function: supabase functions deploy chorddemo-api --no-verify-jwt
+# Edge Function: supabase functions deploy stomper-api --no-verify-jwt
 
 project_id = "apps"
 
-[functions.chorddemo-api]
+[functions.stomper-api]
 verify_jwt = false

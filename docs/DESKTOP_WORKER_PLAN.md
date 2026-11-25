@@ -43,8 +43,8 @@ git config --global user.email "you@example.com"
 ```powershell
 mkdir C:\CursorSites -Force
 cd C:\CursorSites
-gh repo clone ZarleyLtd/ChordDemo
-cd ChordDemo\analyzer
+gh repo clone ZarleyLtd/Stomper
+cd Stomper\analyzer
 ```
 
 **4. Create a separate Python environment and install the analyser.** This takes a few minutes because PyTorch is large.
@@ -67,7 +67,7 @@ If Avast is installed and pip fails with `CERTIFICATE_VERIFY_FAILED`, add this t
 .\analyze.bat https://www.youtube.com/watch?v=<some video>
 ```
 
-If you add songs from both the laptop and the desktop, run `git pull` in `C:\CursorSites\ChordDemo` before analysing. (To do: make `analyze.bat` pull first.)
+If you add songs from both the laptop and the desktop, run `git pull` in `C:\CursorSites\Stomper` before analysing. (To do: make `analyze.bat` pull first.)
 
 ## Part 2: Keep the desktop awake during set hours
 
@@ -86,10 +86,10 @@ powercfg /setactive SCHEME_CURRENT
 **9. Create the two schedules.** Run PowerShell **as Administrator**. This keeps the desktop awake from 9:00 to 23:00; change the times if you like.
 ```powershell
 $wakeSettings = New-ScheduledTaskSettingsSet -WakeToRun -StartWhenAvailable
-Register-ScheduledTask -TaskName "ChordDemo stay awake" -RunLevel Highest -Settings $wakeSettings `
+Register-ScheduledTask -TaskName "Stomper stay awake" -RunLevel Highest -Settings $wakeSettings `
   -Trigger (New-ScheduledTaskTrigger -Daily -At 9:00) `
   -Action (New-ScheduledTaskAction -Execute "powercfg.exe" -Argument "/change standby-timeout-ac 0")
-Register-ScheduledTask -TaskName "ChordDemo allow sleep" -RunLevel Highest -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable) `
+Register-ScheduledTask -TaskName "Stomper allow sleep" -RunLevel Highest -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable) `
   -Trigger (New-ScheduledTaskTrigger -Daily -At 23:00) `
   -Action (New-ScheduledTaskAction -Execute "powercfg.exe" -Argument "/change standby-timeout-ac 30")
 ```
@@ -106,6 +106,6 @@ The desktop must be **asleep, not shut down**, for the 9:00 wake to work. Run `p
 - **On the desktop:** a background worker that starts at login. It checks the queue every 1–2 minutes, runs `git pull`, analyses new songs, publishes them and marks each request done.
 - **Decision needed: where the queue lives.**
   - **GitHub issues** in this repo, as Edison does. The phone needs a GitHub token saved in the app.
-  - **A small table in the shared Supabase "Apps" project.** There's no token on the phone. It needs a `chorddemo-api` Edge Function, set up with the shared-supabase skill.
+  - **A small table in the shared Supabase "Apps" project.** There's no token on the phone. It needs a `stomper-api` Edge Function, set up with the shared-supabase skill.
 
-**To resume:** finish Parts 1 and 2 on the desktop. Then tell Claude "build the ChordDemo queue" and say which queue you chose.
+**To resume:** finish Parts 1 and 2 on the desktop. Then tell Claude "build the Stomper queue" and say which queue you chose.

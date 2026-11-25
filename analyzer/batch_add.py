@@ -1,4 +1,4 @@
-"""Add a list of songs to the ChordDemo library, one at a time.
+"""Add a list of songs to the Stomper library, one at a time.
 
 Usage:  .venv\\Scripts\\python.exe batch_add.py batch\\ug-songs.tsv [--limit N]
 
@@ -22,7 +22,7 @@ import yt_dlp
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import analyze  # noqa: E402
-from chorddemo_api import list_songs  # noqa: E402
+from stomper_api import list_songs  # noqa: E402
 
 BAD = re.compile(r"\b(live|cover|karaoke|lesson|tutorial|instrumental|reaction|remix|8d|slowed|sped up|nightcore|"
                  r"how to play|guitar|piano|bass|drum|backing track)\b", re.I)

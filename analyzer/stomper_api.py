@@ -1,14 +1,14 @@
-"""Save, rename, delete and import ChordDemo songs in Supabase (the chorddemo-api Edge Function).
+"""Save, rename, delete and import Stomper songs in Supabase (the stomper-api Edge Function).
 
 The write key lives in analyzer/.env (git-ignored):
-    CHORDDEMO_API=https://yzyipxvlsoxfphwobfkb.supabase.co/functions/v1/chorddemo-api
-    CHORDDEMO_WRITE_KEY=...
+    STOMPER_API=https://yzyipxvlsoxfphwobfkb.supabase.co/functions/v1/stomper-api
+    STOMPER_WRITE_KEY=...
 
 Command line (run with the analyser's Python):
-    python chorddemo_api.py list
-    python chorddemo_api.py rename <videoId> --title "New title" --artist "New artist"
-    python chorddemo_api.py delete <videoId>
-    python chorddemo_api.py import <song.json> [...]
+    python stomper_api.py list
+    python stomper_api.py rename <videoId> --title "New title" --artist "New artist"
+    python stomper_api.py delete <videoId>
+    python stomper_api.py import <song.json> [...]
 """
 import argparse
 import json
@@ -30,9 +30,9 @@ def _config() -> tuple[str, str]:
             if "=" in line and not line.lstrip().startswith("#"):
                 k, v = line.split("=", 1)
                 vals[k.strip()] = v.strip()
-    url, key = vals.get("CHORDDEMO_API"), vals.get("CHORDDEMO_WRITE_KEY")
+    url, key = vals.get("STOMPER_API"), vals.get("STOMPER_WRITE_KEY")
     if not url or not key:
-        raise SystemExit(f"Missing CHORDDEMO_API / CHORDDEMO_WRITE_KEY in {ENV}")
+        raise SystemExit(f"Missing STOMPER_API / STOMPER_WRITE_KEY in {ENV}")
     return url, key
 
 
@@ -41,7 +41,7 @@ def _post(body: dict) -> dict:
     r = requests.post(url, json={**body, "key": key}, timeout=60)
     out = r.json() if r.headers.get("content-type", "").startswith("application/json") else {"error": r.text}
     if not r.ok:
-        raise SystemExit(f"chorddemo-api {body.get('action')}: {r.status_code} {out.get('error')}")
+        raise SystemExit(f"stomper-api {body.get('action')}: {r.status_code} {out.get('error')}")
     return out
 
 

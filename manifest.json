@@ -1,6 +1,6 @@
 {
-  "name": "ChordDemo",
-  "short_name": "Chords",
+  "name": "Stomper",
+  "short_name": "Stomper",
   "description": "Chords on the beat, capo and synced lyrics for YouTube songs.",
   "start_url": "./index.html",
   "scope": "./",

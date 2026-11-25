@@ -1,9 +1,9 @@
-"""Analyse a YouTube song for ChordDemo: beats, chords and synced lyrics.
+"""Analyse a YouTube song for Stomper: beats, chords and synced lyrics.
 
 Usage:  analyze.bat <youtube-url-or-id> [more ...]
         analyze.bat <youtube-url-or-id> --title "Title" --artist "Artist"
 
-Saves the song to Supabase (chorddemo.songs, through the chorddemo-api Edge Function),
+Saves the song to Supabase (stomper.songs, through the stomper-api Edge Function),
 so it appears in the app's Song Library on the next reload. No commit or push needed.
 --title / --artist override what YouTube reports (only with a single song).
 --file also writes ../songs/<videoId>.json locally instead of saving (for testing).
@@ -32,7 +32,7 @@ BTC_DIR = HERE / "vendor" / "BTC"
 SONGS_DIR = HERE.parent / "songs"
 sys.path.insert(0, str(BTC_DIR))
 
-UA = "ChordDemo/0.1 (personal hobby project)"
+UA = "Stomper/0.1 (personal hobby project)"
 
 QUALITY = {  # BTC quality -> display suffix
     "maj": "", "min": "m", "dim": "dim", "aug": "aug", "min6": "m6", "maj6": "6",
@@ -264,7 +264,7 @@ def fetch_lyrics(artist: str, track: str, duration: float) -> dict | None:
 def analyse(arg: str, title: str | None = None, artist_name: str | None = None, to_file: bool = False) -> None:
     vid = video_id(arg)
     t0 = time.time()
-    work = Path(tempfile.mkdtemp(prefix="chorddemo-"))
+    work = Path(tempfile.mkdtemp(prefix="stomper-"))
     try:
         print(f"[{vid}] downloading audio ...")
         info, wav = download(vid, work)
@@ -304,7 +304,7 @@ def analyse(arg: str, title: str | None = None, artist_name: str | None = None, 
         (SONGS_DIR / f"{vid}.json").write_text(json.dumps(song, separators=(",", ":")), encoding="utf-8")
         print(f"[{vid}] done in {time.time() - t0:.0f}s, {bpm} bpm -> songs/{vid}.json (not saved to the library)")
         return
-    from chorddemo_api import save_song
+    from stomper_api import save_song
     save_song(song)
     print(f"[{vid}] done in {time.time() - t0:.0f}s, {bpm} bpm -> saved to the library: {artist} - {track}")
 
